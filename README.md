@@ -3,7 +3,7 @@
 A production-grade, fully customizable React Native Rich Text Input using the **Overlay Technique** — no WebView required.
 
 [![npm version](https://img.shields.io/npm/v/react-native-richify.svg)](https://www.npmjs.com/package/react-native-richify)
-[![license](https://img.shields.io/npm/l/react-native-richify.svg)](https://github.com/user/react-native-richify/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/react-native-richify.svg)](https://github.com/soumya-99/react-native-richify/blob/main/LICENSE)
 
 ## Features
 
