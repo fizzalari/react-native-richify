@@ -1,0 +1,83 @@
+{
+  "name": "react-native-richify",
+  "version": "1.0.0",
+  "description": "A production-grade, fully customizable React Native Rich Text Input using the Overlay Technique — no WebView required.",
+  "main": "lib/commonjs/index.js",
+  "module": "lib/module/index.js",
+  "types": "lib/typescript/src/index.d.ts",
+  "react-native": "src/index.ts",
+  "source": "src/index.ts",
+  "files": [
+    "src",
+    "lib",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__"
+  ],
+  "scripts": {
+    "build": "bob build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "tsc --noEmit",
+    "prepare": "bob build",
+    "release": "npm publish"
+  },
+  "keywords": [
+    "react-native",
+    "rich-text",
+    "text-input",
+    "rich-text-editor",
+    "formatted-text",
+    "overlay-technique",
+    "typescript",
+    "customizable",
+    "no-webview"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/react-native-richify.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/user/react-native-richify/issues"
+  },
+  "homepage": "https://github.com/user/react-native-richify#readme",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "@react-native/babel-preset": "^0.84.1",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "latest",
+    "@types/jest": "^29.5.12",
+    "@types/react": "latest",
+    "babel-jest": "^30.3.0",
+    "babel-plugin-module-resolver": "^5.0.2",
+    "jest": "^29.7.0",
+    "react": "latest",
+    "react-native": "latest",
+    "react-native-builder-bob": "latest",
+    "react-test-renderer": "latest",
+    "typescript": "latest"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "react-native": ">=0.84.0"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      "commonjs",
+      "module",
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
+    ]
+  }
+}
