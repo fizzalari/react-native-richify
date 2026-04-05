@@ -55,11 +55,32 @@ export function formatStyleToTextStyle(
     style.fontSize = formatStyle.fontSize;
   }
 
+  if (formatStyle.textAlign) {
+    style.textAlign = formatStyle.textAlign;
+  }
+
   // Heading — overrides font size and weight
   if (formatStyle.heading && formatStyle.heading !== 'none') {
     style.fontSize = HEADING_FONT_SIZES[formatStyle.heading];
     style.fontWeight = 'bold';
     style.lineHeight = HEADING_FONT_SIZES[formatStyle.heading] * 1.3;
+  }
+
+  if (formatStyle.link) {
+    style.color =
+      style.color ??
+      resolvedTheme.colors?.link ??
+      DEFAULT_THEME.colors?.link ??
+      DEFAULT_THEME.colors?.primary;
+
+    if (style.textDecorationLine === 'line-through') {
+      style.textDecorationLine = 'underline line-through';
+    } else if (
+      !style.textDecorationLine ||
+      style.textDecorationLine === 'none'
+    ) {
+      style.textDecorationLine = 'underline';
+    }
   }
 
   return style;

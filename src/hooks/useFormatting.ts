@@ -4,12 +4,16 @@ import type {
   FormatType,
   FormatStyle,
   HeadingLevel,
+  ListType,
   SelectionRange,
+  TextAlign,
 } from '../types';
 import {
   toggleFormatOnSelection,
   setStyleOnSelection,
   setHeadingOnLine,
+  setListTypeOnLine,
+  setTextAlignOnLine,
   isFormatActiveInSelection,
   getSelectionStyle,
 } from '../utils/formatter';
@@ -78,14 +82,23 @@ export function useFormatting({
 
   const setHeading = useCallback(
     (level: HeadingLevel) => {
+      const currentHeading =
+        selection.start === selection.end
+          ? getSelectionStyle(segments, selection).heading ?? activeStyles.heading
+          : getSelectionStyle(segments, selection).heading;
+      const nextHeading: HeadingLevel =
+        currentHeading === level ? 'none' : level;
+
       if (selection.start === selection.end) {
         onActiveStylesChange({
           ...activeStyles,
-          heading: level === 'none' ? undefined : level,
+          heading: nextHeading === 'none' ? undefined : nextHeading,
+          listType:
+            nextHeading === 'none' ? activeStyles.listType : undefined,
         });
       }
 
-      const newSegments = setHeadingOnLine(segments, selection, level);
+      const newSegments = setHeadingOnLine(segments, selection, nextHeading);
       onSegmentsChange(newSegments);
     },
     [
@@ -95,6 +108,64 @@ export function useFormatting({
       segments,
       selection,
     ],
+  );
+
+  const setListType = useCallback(
+    (listType: ListType) => {
+      if (selection.start === selection.end) {
+        onActiveStylesChange({
+          ...activeStyles,
+          listType: listType === 'none' ? undefined : listType,
+          heading: listType === 'none' ? activeStyles.heading : undefined,
+        });
+      }
+
+      const newSegments = setListTypeOnLine(segments, selection, listType);
+      onSegmentsChange(newSegments);
+    },
+    [
+      activeStyles,
+      onActiveStylesChange,
+      onSegmentsChange,
+      segments,
+      selection,
+    ],
+  );
+
+  const setTextAlign = useCallback(
+    (textAlign: TextAlign) => {
+      if (selection.start === selection.end) {
+        onActiveStylesChange({
+          ...activeStyles,
+          textAlign,
+        });
+      }
+
+      const newSegments = setTextAlignOnLine(segments, selection, textAlign);
+      onSegmentsChange(newSegments);
+    },
+    [
+      activeStyles,
+      onActiveStylesChange,
+      onSegmentsChange,
+      segments,
+      selection,
+    ],
+  );
+
+  const setLink = useCallback(
+    (url?: string) => {
+      if (selection.start === selection.end) {
+        onActiveStylesChange({
+          ...activeStyles,
+          link: url,
+        });
+      } else {
+        const newSegments = setStyleOnSelection(segments, selection, 'link', url);
+        onSegmentsChange(newSegments);
+      }
+    },
+    [segments, selection, activeStyles, onSegmentsChange, onActiveStylesChange],
   );
 
   const setColor = useCallback(
@@ -139,6 +210,9 @@ export function useFormatting({
     toggleFormat,
     setStyleProperty,
     setHeading,
+    setListType,
+    setTextAlign,
+    setLink,
     setColor,
     setBackgroundColor,
     setFontSize,

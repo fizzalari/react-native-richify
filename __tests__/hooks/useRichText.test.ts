@@ -277,6 +277,21 @@ describe('useRichText', () => {
       expect(result.current.state.segments[0].styles.heading).toBe('h1');
     });
 
+    it('toggles an applied heading off when the same button is pressed again', () => {
+      const { result } = renderHook(() =>
+        useRichText({
+          initialSegments: [createSegment('Title', { heading: 'h1' })],
+        }),
+      );
+
+      act(() => {
+        result.current.actions.handleSelectionChange({ start: 0, end: 0 });
+        result.current.actions.setHeading('h1');
+      });
+
+      expect(result.current.state.segments[0].styles.heading).toBeUndefined();
+    });
+
     it('stores heading as an active style for future typing', () => {
       const { result } = renderHook(() => useRichText());
 
@@ -290,6 +305,79 @@ describe('useRichText', () => {
       });
 
       expect(result.current.actions.getOutput('markdown')).toBe('### A');
+    });
+  });
+
+  describe('setListType', () => {
+    it('applies list formatting to the current line', () => {
+      const { result } = renderHook(() =>
+        useRichText({
+          initialSegments: [createSegment('First item')],
+        }),
+      );
+
+      act(() => {
+        result.current.actions.setListType('bullet');
+      });
+
+      expect(result.current.actions.getOutput('markdown')).toBe('- First item');
+    });
+  });
+
+  describe('setTextAlign', () => {
+    it('serializes alignment through markdown output using html fallback', () => {
+      const { result } = renderHook(() =>
+        useRichText({
+          initialSegments: [createSegment('Centered copy')],
+        }),
+      );
+
+      act(() => {
+        result.current.actions.setTextAlign('center');
+      });
+
+      expect(result.current.actions.getOutput('markdown')).toBe(
+        '<p style="text-align: center">Centered copy</p>',
+      );
+    });
+  });
+
+  describe('setLink', () => {
+    it('applies a link to selected text', () => {
+      const { result } = renderHook(() =>
+        useRichText({
+          initialSegments: [createSegment('OpenAI')],
+        }),
+      );
+
+      act(() => {
+        result.current.actions.handleSelectionChange({ start: 0, end: 6 });
+      });
+
+      act(() => {
+        result.current.actions.setLink('https://openai.com');
+      });
+
+      expect(result.current.actions.getOutput('markdown')).toBe(
+        '[OpenAI](https://openai.com)',
+      );
+    });
+  });
+
+  describe('insertImage', () => {
+    it('inserts an image placeholder and serializes it', () => {
+      const { result } = renderHook(() => useRichText());
+
+      act(() => {
+        result.current.actions.insertImage('https://cdn.test/photo.png', {
+          alt: 'Photo',
+        });
+      });
+
+      expect(result.current.actions.getPlainText()).toBe('[Image: Photo]');
+      expect(result.current.actions.getOutput('markdown')).toBe(
+        '![Photo](https://cdn.test/photo.png)',
+      );
     });
   });
 

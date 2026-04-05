@@ -14,7 +14,20 @@ import { ToolbarButton } from './ToolbarButton';
  * - Horizontal scrolling for overflow
  */
 export const Toolbar: React.FC<ToolbarProps> = React.memo(
-  ({ actions, state, items, theme, visible = true, renderToolbar }) => {
+  ({
+    actions,
+    state,
+    items,
+    theme,
+    visible = true,
+    outputFormat = 'markdown',
+    outputPreviewMode = 'literal',
+    onOutputFormatChange,
+    onOutputPreviewModeChange,
+    onRequestLink,
+    onRequestImage,
+    renderToolbar,
+  }) => {
     const resolvedTheme = theme ?? DEFAULT_THEME;
     const toolbarItems = items ?? DEFAULT_TOOLBAR_ITEMS;
 
@@ -33,12 +46,32 @@ export const Toolbar: React.FC<ToolbarProps> = React.memo(
           isActive = selectionStyle.heading === item.heading;
         }
 
+        if (item.listType) {
+          isActive = selectionStyle.listType === item.listType;
+        }
+
+        if (item.textAlign) {
+          isActive = selectionStyle.textAlign === item.textAlign;
+        }
+
+        if (item.outputFormat) {
+          isActive = outputFormat === item.outputFormat;
+        }
+
+        if (item.outputPreviewMode) {
+          isActive = outputPreviewMode === item.outputPreviewMode;
+        }
+
+        if (item.actionType === 'link') {
+          isActive = !!selectionStyle.link;
+        }
+
         return {
           ...item,
           active: item.active ?? isActive,
         };
       });
-    }, [actions, toolbarItems]);
+    }, [actions, outputFormat, outputPreviewMode, toolbarItems]);
 
     // Custom render
     if (renderToolbar) {
@@ -46,6 +79,13 @@ export const Toolbar: React.FC<ToolbarProps> = React.memo(
         items: enrichedItems,
         state,
         actions,
+        outputFormat,
+        outputPreviewMode,
+        onOutputFormatChange: onOutputFormatChange ?? (() => undefined),
+        onOutputPreviewModeChange:
+          onOutputPreviewModeChange ?? (() => undefined),
+        onRequestLink,
+        onRequestImage,
       });
     }
 
@@ -79,6 +119,18 @@ export const Toolbar: React.FC<ToolbarProps> = React.memo(
                   actions.toggleFormat(item.format);
                 } else if (item.heading) {
                   actions.setHeading(item.heading);
+                } else if (item.listType) {
+                  actions.setListType(item.listType);
+                } else if (item.textAlign) {
+                  actions.setTextAlign(item.textAlign);
+                } else if (item.outputFormat) {
+                  onOutputFormatChange?.(item.outputFormat);
+                } else if (item.outputPreviewMode) {
+                  onOutputPreviewModeChange?.(item.outputPreviewMode);
+                } else if (item.actionType === 'link') {
+                  onRequestLink?.();
+                } else if (item.actionType === 'image') {
+                  onRequestImage?.();
                 }
               }}
             />

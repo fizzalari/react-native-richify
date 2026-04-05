@@ -151,6 +151,63 @@ describe('useFormatting', () => {
         expect.objectContaining({ heading: 'h2' }),
       );
     });
+
+    it('toggles the same active heading level off', () => {
+      const { hook, onActiveStylesChange } = createFormattingHook({
+        activeStyles: { ...EMPTY_FORMAT_STYLE, heading: 'h2' },
+      });
+
+      act(() => {
+        hook.result.current.setHeading('h2');
+      });
+
+      expect(onActiveStylesChange).toHaveBeenCalledWith(
+        expect.objectContaining({ heading: undefined }),
+      );
+    });
+  });
+
+  describe('setListType', () => {
+    it('updates active list style when no text is selected', () => {
+      const { hook, onActiveStylesChange } = createFormattingHook();
+
+      act(() => {
+        hook.result.current.setListType('ordered');
+      });
+
+      expect(onActiveStylesChange).toHaveBeenCalledWith(
+        expect.objectContaining({ listType: 'ordered', heading: undefined }),
+      );
+    });
+  });
+
+  describe('setTextAlign', () => {
+    it('updates active alignment when no text is selected', () => {
+      const { hook, onActiveStylesChange } = createFormattingHook();
+
+      act(() => {
+        hook.result.current.setTextAlign('right');
+      });
+
+      expect(onActiveStylesChange).toHaveBeenCalledWith(
+        expect.objectContaining({ textAlign: 'right' }),
+      );
+    });
+  });
+
+  describe('setLink', () => {
+    it('applies link style to the selected text', () => {
+      const { hook, onSegmentsChange } = createFormattingHook({
+        selection: { start: 0, end: 5 },
+      });
+
+      act(() => {
+        hook.result.current.setLink('https://openai.com');
+      });
+
+      const newSegments = onSegmentsChange.mock.calls[0][0];
+      expect(newSegments[0].styles.link).toBe('https://openai.com');
+    });
   });
 
   describe('isFormatActive', () => {

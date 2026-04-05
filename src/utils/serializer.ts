@@ -1,8 +1,10 @@
 import type {
   FormatStyle,
   HeadingLevel,
+  ListType,
   OutputFormat,
   StyledSegment,
+  TextAlign,
 } from '../types';
 
 type LineFragment = Pick<StyledSegment, 'text' | 'styles'>;
@@ -15,7 +17,29 @@ export function serializeSegments(
   format: OutputFormat = 'markdown',
 ): string {
   const lines = splitSegmentsByLine(segments);
-  return lines.map((line) => serializeLine(line, format)).join('\n');
+  const blocks: string[] = [];
+
+  for (let index = 0; index < lines.length; ) {
+    const line = lines[index];
+    const listType = getLineListType(line);
+
+    if (listType && listType !== 'none') {
+      const listLines: LineFragment[][] = [];
+
+      while (index < lines.length && getLineListType(lines[index]) === listType) {
+        listLines.push(lines[index]);
+        index++;
+      }
+
+      blocks.push(serializeListBlock(listLines, format, listType));
+      continue;
+    }
+
+    blocks.push(serializeBlockLine(line, format));
+    index++;
+  }
+
+  return blocks.join('\n');
 }
 
 /**
@@ -39,7 +63,7 @@ function splitSegmentsByLine(segments: StyledSegment[]): LineFragment[][] {
     const parts = segment.text.split('\n');
 
     parts.forEach((part, index) => {
-      if (part.length > 0) {
+      if (part.length > 0 || segment.styles.imageSrc) {
         lines[lines.length - 1]?.push({
           text: part,
           styles: { ...segment.styles },
@@ -55,18 +79,48 @@ function splitSegmentsByLine(segments: StyledSegment[]): LineFragment[][] {
   return lines;
 }
 
-function serializeLine(
+function serializeListBlock(
+  lines: LineFragment[][],
+  format: OutputFormat,
+  listType: ListType,
+): string {
+  if (format === 'html' || lines.some((line) => !!getLineTextAlign(line))) {
+    const tag = listType === 'ordered' ? 'ol' : 'ul';
+    const items = lines.map((line) => serializeHtmlListItem(line)).join('');
+    return `<${tag}>${items}</${tag}>`;
+  }
+
+  return lines
+    .map((line, index) => {
+      const marker = listType === 'ordered' ? `${index + 1}.` : '-';
+      const content = serializeLineContent(line, format);
+      return content.length > 0 ? `${marker} ${content}` : marker;
+    })
+    .join('\n');
+}
+
+function serializeHtmlListItem(line: LineFragment[]): string {
+  const content = serializeLineContent(line, 'html');
+  const styleAttribute = buildBlockStyle(getLineTextAlign(line));
+  return `<li${styleAttribute ? ` style="${styleAttribute}"` : ''}>${content}</li>`;
+}
+
+function serializeBlockLine(
   line: LineFragment[],
   format: OutputFormat,
 ): string {
   const heading = getLineHeading(line);
-  const content = line
-    .map((fragment) => serializeFragment(fragment, format, heading))
-    .join('');
+  const textAlign = getLineTextAlign(line);
+  const content = serializeLineContent(line, format, heading);
 
   if (format === 'html') {
     const blockTag = heading ?? 'p';
-    return `<${blockTag}>${content}</${blockTag}>`;
+    const styleAttribute = buildBlockStyle(textAlign);
+    return `<${blockTag}${styleAttribute ? ` style="${styleAttribute}"` : ''}>${content}</${blockTag}>`;
+  }
+
+  if (textAlign) {
+    return serializeAlignedMarkdownLine(content, heading, textAlign);
   }
 
   const headingPrefix = getHeadingPrefix(heading);
@@ -77,15 +131,42 @@ function serializeLine(
   return content.length > 0 ? `${headingPrefix} ${content}` : headingPrefix;
 }
 
+function serializeAlignedMarkdownLine(
+  content: string,
+  heading: HeadingLevel | undefined,
+  textAlign: TextAlign,
+): string {
+  const blockTag = heading ?? 'p';
+  const styleAttribute = buildBlockStyle(textAlign);
+  return `<${blockTag} style="${styleAttribute}">${content}</${blockTag}>`;
+}
+
+function serializeLineContent(
+  line: LineFragment[],
+  format: OutputFormat,
+  lineHeading?: HeadingLevel,
+): string {
+  return line
+    .map((fragment) => serializeFragment(fragment, format, lineHeading))
+    .join('');
+}
+
 function serializeFragment(
   fragment: LineFragment,
   format: OutputFormat,
   lineHeading?: HeadingLevel,
 ): string {
+  if (fragment.styles.imageSrc) {
+    return serializeImageFragment(fragment, format);
+  }
+
   const normalizedStyles: FormatStyle = {
     ...fragment.styles,
     heading: undefined,
-    // Markdown headings already express emphasis at the block level.
+    listType: undefined,
+    textAlign: undefined,
+    imageSrc: undefined,
+    imageAlt: undefined,
     bold:
       lineHeading && lineHeading !== 'none' ? false : fragment.styles.bold,
   };
@@ -93,6 +174,20 @@ function serializeFragment(
   return format === 'html'
     ? serializeHtmlFragment(fragment.text, normalizedStyles)
     : serializeMarkdownFragment(fragment.text, normalizedStyles);
+}
+
+function serializeImageFragment(
+  fragment: LineFragment,
+  format: OutputFormat,
+): string {
+  const source = fragment.styles.imageSrc ?? '';
+  const altText = fragment.styles.imageAlt ?? extractImageAlt(fragment.text);
+
+  if (format === 'html') {
+    return `<img src="${escapeHtml(source)}" alt="${escapeHtml(altText)}" />`;
+  }
+
+  return `![${escapeMarkdown(altText)}](${escapeMarkdownUrl(source)})`;
 }
 
 function serializeHtmlFragment(text: string, styles: FormatStyle): string {
@@ -121,6 +216,10 @@ function serializeHtmlFragment(text: string, styles: FormatStyle): string {
   const styleAttribute = buildInlineStyle(styles);
   if (styleAttribute) {
     result = `<span style="${styleAttribute}">${result}</span>`;
+  }
+
+  if (styles.link) {
+    result = `<a href="${escapeHtml(styles.link)}">${result}</a>`;
   }
 
   return result;
@@ -154,6 +253,10 @@ function serializeMarkdownFragment(text: string, styles: FormatStyle): string {
     result = `<span style="${styleAttribute}">${result}</span>`;
   }
 
+  if (styles.link) {
+    result = `[${result}](${escapeMarkdownUrl(styles.link)})`;
+  }
+
   return result;
 }
 
@@ -175,10 +278,40 @@ function buildInlineStyle(styles: FormatStyle): string {
   return cssRules.join('; ');
 }
 
+function buildBlockStyle(textAlign?: TextAlign): string {
+  const cssRules: string[] = [];
+
+  if (textAlign) {
+    cssRules.push(`text-align: ${textAlign}`);
+  }
+
+  return cssRules.join('; ');
+}
+
 function getLineHeading(line: LineFragment[]): HeadingLevel | undefined {
   for (const fragment of line) {
     if (fragment.styles.heading && fragment.styles.heading !== 'none') {
       return fragment.styles.heading;
+    }
+  }
+
+  return undefined;
+}
+
+function getLineListType(line: LineFragment[]): ListType | undefined {
+  for (const fragment of line) {
+    if (fragment.styles.listType && fragment.styles.listType !== 'none') {
+      return fragment.styles.listType;
+    }
+  }
+
+  return undefined;
+}
+
+function getLineTextAlign(line: LineFragment[]): TextAlign | undefined {
+  for (const fragment of line) {
+    if (fragment.styles.textAlign) {
+      return fragment.styles.textAlign;
     }
   }
 
@@ -198,6 +331,11 @@ function getHeadingPrefix(heading?: HeadingLevel): string | undefined {
   }
 }
 
+function extractImageAlt(text: string): string {
+  const normalized = text.replace(/^\[Image:\s*/i, '').replace(/^\[Image\]/i, '').replace(/\]$/, '').trim();
+  return normalized.length > 0 ? normalized : 'image';
+}
+
 function escapeHtml(text: string): string {
   return text
     .replaceAll('&', '&amp;')
@@ -209,6 +347,10 @@ function escapeHtml(text: string): string {
 
 function escapeMarkdown(text: string): string {
   return text.replace(/([\\`*_~[\]])/g, '\\$1');
+}
+
+function escapeMarkdownUrl(url: string): string {
+  return url.replaceAll(' ', '%20').replaceAll(')', '%29');
 }
 
 function wrapInlineCode(text: string): string {

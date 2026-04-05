@@ -9,6 +9,10 @@ const mockActions: RichTextActions = {
   toggleFormat: jest.fn(),
   setStyleProperty: jest.fn(),
   setHeading: jest.fn(),
+  setListType: jest.fn(),
+  setTextAlign: jest.fn(),
+  setLink: jest.fn(),
+  insertImage: jest.fn(),
   setColor: jest.fn(),
   setBackgroundColor: jest.fn(),
   setFontSize: jest.fn(),
@@ -166,6 +170,25 @@ describe('Toolbar', () => {
 
     expect(mockActions.isFormatActive).toHaveBeenCalledWith('bold');
     expect(mockActions.getSelectionStyle).toHaveBeenCalled();
-    expect(selectedButtons).toHaveLength(2);
+    expect(selectedButtons).toHaveLength(4);
+  });
+
+  it('routes output format and preview mode buttons through toolbar callbacks', () => {
+    const onOutputFormatChange = jest.fn();
+    const onOutputPreviewModeChange = jest.fn();
+    const { getByText } = render(
+      <Toolbar
+        actions={mockActions}
+        state={mockState}
+        onOutputFormatChange={onOutputFormatChange}
+        onOutputPreviewModeChange={onOutputPreviewModeChange}
+      />,
+    );
+
+    fireEvent.press(getByText('HTML'));
+    fireEvent.press(getByText('View'));
+
+    expect(onOutputFormatChange).toHaveBeenCalledWith('html');
+    expect(onOutputPreviewModeChange).toHaveBeenCalledWith('rendered');
   });
 });

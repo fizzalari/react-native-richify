@@ -1,4 +1,10 @@
-import React, { useEffect, useCallback, useMemo, useRef } from 'react';
+import React, {
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   Animated,
   Easing,
@@ -8,6 +14,7 @@ import {
   TextInput,
   View,
   type NativeSyntheticEvent,
+  type TextInputContentSizeChangeEventData,
   type TextInputSelectionChangeEventData,
 } from 'react-native';
 import type { RichTextInputProps } from '../types';
@@ -15,9 +22,10 @@ import { DEFAULT_THEME } from '../constants/defaultStyles';
 import { useRichText } from '../hooks/useRichText';
 import { segmentsToPlainText } from '../utils/parser';
 import { serializeSegments } from '../utils/serializer';
+import { RenderedOutput } from './RenderedOutput';
 import { Toolbar } from './Toolbar';
 
-const OUTPUT_PANEL_HEIGHT = 180;
+const DEFAULT_OUTPUT_PANEL_MAX_HEIGHT = 180;
 const isJestRuntime =
   typeof (
     globalThis as {
@@ -43,8 +51,16 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
   toolbarItems,
   theme,
   showOutputPreview = true,
-  outputFormat = 'markdown',
+  outputFormat,
+  defaultOutputFormat = 'markdown',
+  outputPreviewMode,
+  defaultOutputPreviewMode = 'literal',
+  maxOutputHeight = DEFAULT_OUTPUT_PANEL_MAX_HEIGHT,
   onChangeOutput,
+  onChangeOutputFormat,
+  onChangeOutputPreviewMode,
+  onRequestLink,
+  onRequestImage,
   multiline = true,
   minHeight = 120,
   maxHeight,
@@ -55,6 +71,12 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
 }) => {
   const resolvedTheme = theme ?? DEFAULT_THEME;
   const previewProgress = useRef(new Animated.Value(0)).current;
+  const [internalOutputFormat, setInternalOutputFormat] =
+    useState(defaultOutputFormat);
+  const [internalOutputPreviewMode, setInternalOutputPreviewMode] = useState(
+    defaultOutputPreviewMode,
+  );
+  const [contentHeight, setContentHeight] = useState(minHeight);
 
   const { state, actions } = useRichText({
     initialSegments,
@@ -67,15 +89,41 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
   }, [actions, onReady]);
 
   const plainText = segmentsToPlainText(state.segments);
+  const resolvedOutputFormat = outputFormat ?? internalOutputFormat;
+  const resolvedOutputPreviewMode =
+    outputPreviewMode ?? internalOutputPreviewMode;
+  const inputHeight = Math.max(
+    minHeight,
+    typeof maxHeight === 'number'
+      ? Math.min(contentHeight, maxHeight)
+      : contentHeight,
+  );
+  const shouldScrollInput =
+    typeof maxHeight === 'number' && contentHeight > maxHeight;
   const serializedOutput = useMemo(
-    () => serializeSegments(state.segments, outputFormat),
-    [outputFormat, state.segments],
+    () => serializeSegments(state.segments, resolvedOutputFormat),
+    [resolvedOutputFormat, state.segments],
   );
   const shouldShowOutputPreview = showOutputPreview && plainText.length > 0;
+  const normalizedSelection = useMemo(
+    () => ({
+      start: Math.min(state.selection.start, state.selection.end),
+      end: Math.max(state.selection.start, state.selection.end),
+    }),
+    [state.selection.end, state.selection.start],
+  );
+  const selectedText = useMemo(
+    () => plainText.slice(normalizedSelection.start, normalizedSelection.end),
+    [normalizedSelection.end, normalizedSelection.start, plainText],
+  );
+  const selectionStyle = useMemo(
+    () => actions.getSelectionStyle(),
+    [actions, state.activeStyles, state.segments, state.selection],
+  );
 
   useEffect(() => {
-    onChangeOutput?.(serializedOutput, outputFormat);
-  }, [onChangeOutput, outputFormat, serializedOutput]);
+    onChangeOutput?.(serializedOutput, resolvedOutputFormat);
+  }, [onChangeOutput, resolvedOutputFormat, serializedOutput]);
 
   useEffect(() => {
     if (isJestRuntime) {
@@ -99,29 +147,107 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
     [actions],
   );
 
+  const onContentSizeChange = useCallback(
+    (e: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) => {
+      setContentHeight(Math.ceil(e.nativeEvent.contentSize.height));
+      textInputProps?.onContentSizeChange?.(e);
+    },
+    [textInputProps],
+  );
+
+  const handleOutputFormatChange = useCallback(
+    (format: 'markdown' | 'html') => {
+      if (outputFormat === undefined) {
+        setInternalOutputFormat(format);
+      }
+
+      onChangeOutputFormat?.(format);
+    },
+    [onChangeOutputFormat, outputFormat],
+  );
+
+  const handleOutputPreviewModeChange = useCallback(
+    (mode: 'literal' | 'rendered') => {
+      if (outputPreviewMode === undefined) {
+        setInternalOutputPreviewMode(mode);
+      }
+
+      onChangeOutputPreviewMode?.(mode);
+    },
+    [onChangeOutputPreviewMode, outputPreviewMode],
+  );
+
+  const handleRequestLink = useCallback(() => {
+    if (onRequestLink) {
+      onRequestLink({
+        selectedText,
+        currentUrl: selectionStyle.link,
+        applyLink: actions.setLink,
+      });
+      return;
+    }
+
+    if (selectionStyle.link) {
+      actions.setLink(undefined);
+      return;
+    }
+
+    const detectedUrl = detectLinkTarget(selectedText);
+    if (detectedUrl) {
+      actions.setLink(detectedUrl);
+    }
+  }, [actions, onRequestLink, selectedText, selectionStyle.link]);
+
+  const handleRequestImage = useCallback(() => {
+    if (onRequestImage) {
+      onRequestImage({
+        insertImage: actions.insertImage,
+      });
+      return;
+    }
+
+    const detectedSource = detectImageSource(selectedText);
+    if (detectedSource) {
+      actions.insertImage(detectedSource, {
+        alt: selectedText.trim() || undefined,
+      });
+    }
+  }, [actions, onRequestImage, selectedText]);
+
+  const outputLabel = useMemo(() => {
+    const formatLabel = resolvedOutputFormat === 'html' ? 'HTML' : 'Markdown';
+
+    if (resolvedOutputPreviewMode === 'rendered') {
+      return `${formatLabel} preview`;
+    }
+
+    return `${formatLabel} output`;
+  }, [resolvedOutputFormat, resolvedOutputPreviewMode]);
+
   const containerStyle = [
     resolvedTheme.containerStyle ?? DEFAULT_THEME.containerStyle,
   ];
-  const inputAreaStyle = [
-    styles.inputArea,
-    { minHeight },
-    maxHeight ? { maxHeight } : undefined,
-  ];
+  const inputAreaStyle = [styles.inputArea];
   const inputStyle = [
     styles.textInput,
     resolvedTheme.baseTextStyle ?? DEFAULT_THEME.baseTextStyle,
     resolvedTheme.inputStyle ?? DEFAULT_THEME.inputStyle,
+    { height: inputHeight },
     textInputProps?.style,
   ];
   const outputAnimatedStyle = {
     maxHeight: previewProgress.interpolate({
       inputRange: [0, 1],
-      outputRange: [0, OUTPUT_PANEL_HEIGHT],
+      outputRange: [0, maxOutputHeight + 72],
     }),
     opacity: previewProgress,
     marginTop: previewProgress.interpolate({
       inputRange: [0, 1],
       outputRange: [0, 12],
+    }),
+    marginBottom: previewProgress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, 16],
     }),
     transform: [
       {
@@ -148,6 +274,12 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
       state={state}
       items={toolbarItems}
       theme={resolvedTheme}
+      outputFormat={resolvedOutputFormat}
+      outputPreviewMode={resolvedOutputPreviewMode}
+      onOutputFormatChange={handleOutputFormatChange}
+      onOutputPreviewModeChange={handleOutputPreviewModeChange}
+      onRequestLink={handleRequestLink}
+      onRequestImage={handleRequestImage}
       renderToolbar={renderToolbar}
     />
   ) : null;
@@ -180,6 +312,7 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
           value={plainText}
           onChangeText={actions.handleTextChange}
           onSelectionChange={onSelectionChange}
+          onContentSizeChange={onContentSizeChange}
           multiline={multiline}
           placeholder={placeholder}
           placeholderTextColor={
@@ -193,7 +326,7 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
             resolvedTheme.colors?.cursor ?? DEFAULT_THEME.colors?.cursor
           }
           textAlignVertical="top"
-          scrollEnabled={typeof maxHeight === 'number'}
+          scrollEnabled={shouldScrollInput}
         />
 
         {showOutputPreview && (
@@ -203,12 +336,22 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
           >
             <View style={outputContainerStyle}>
               <Text style={outputLabelStyle}>
-                {outputFormat === 'html' ? 'HTML output' : 'Markdown output'}
+                {outputLabel}
               </Text>
-              <ScrollView showsVerticalScrollIndicator={false}>
-                <Text selectable style={outputTextStyle}>
-                  {serializedOutput}
-                </Text>
+              <ScrollView
+                style={{ maxHeight: maxOutputHeight }}
+                showsVerticalScrollIndicator={false}
+              >
+                {resolvedOutputPreviewMode === 'rendered' ? (
+                  <RenderedOutput
+                    segments={state.segments}
+                    theme={resolvedTheme}
+                  />
+                ) : (
+                  <Text selectable style={outputTextStyle}>
+                    {serializedOutput}
+                  </Text>
+                )}
               </ScrollView>
             </View>
           </Animated.View>
@@ -235,3 +378,38 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 });
+
+function detectLinkTarget(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    return undefined;
+  }
+
+  if (/^https?:\/\//i.test(trimmed) || /^mailto:/i.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+    return `mailto:${trimmed}`;
+  }
+
+  if (/^[^\s]+\.[^\s]+$/.test(trimmed)) {
+    return `https://${trimmed}`;
+  }
+
+  return undefined;
+}
+
+function detectImageSource(value: string): string | undefined {
+  const normalized = detectLinkTarget(value);
+  if (!normalized) {
+    return undefined;
+  }
+
+  const candidate = normalized.replace(/^mailto:/i, '');
+  if (/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(candidate)) {
+    return normalized;
+  }
+
+  return undefined;
+}

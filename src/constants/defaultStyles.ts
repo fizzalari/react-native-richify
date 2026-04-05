@@ -12,6 +12,7 @@ export const DEFAULT_COLORS = {
   toolbarBorder: '#E5E7EB',
   outputBackground: '#F8FAFC',
   outputLabel: '#475569',
+  link: '#2563EB',
   cursor: '#6366F1',
   activeButtonBg: '#EEF2FF',
   codeBackground: '#F3F4F6',
@@ -50,6 +51,11 @@ export const EMPTY_FORMAT_STYLE: FormatStyle = {
   backgroundColor: undefined,
   fontSize: undefined,
   heading: undefined,
+  listType: undefined,
+  textAlign: undefined,
+  link: undefined,
+  imageSrc: undefined,
+  imageAlt: undefined,
 };
 
 /**
@@ -108,6 +114,9 @@ export const DEFAULT_THEME: RichTextTheme = {
     color: DEFAULT_COLORS.text,
     fontFamily: 'monospace',
   },
+  renderedOutputStyle: {
+    gap: 10,
+  },
   toolbarStyle: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -150,6 +159,7 @@ export const DEFAULT_THEME: RichTextTheme = {
     placeholder: DEFAULT_COLORS.placeholder,
     toolbarBackground: DEFAULT_COLORS.toolbarBackground,
     toolbarBorder: DEFAULT_COLORS.toolbarBorder,
+    link: DEFAULT_COLORS.link,
     cursor: DEFAULT_COLORS.cursor,
   },
 };
@@ -166,4 +176,15 @@ export const DEFAULT_TOOLBAR_ITEMS: ToolbarItem[] = [
   { id: 'h1', label: 'H1', heading: 'h1' },
   { id: 'h2', label: 'H2', heading: 'h2' },
   { id: 'h3', label: 'H3', heading: 'h3' },
+  { id: 'bullet', label: '\u2022', listType: 'bullet' },
+  { id: 'ordered', label: '1.', listType: 'ordered' },
+  { id: 'link', label: 'Link', actionType: 'link' },
+  { id: 'image', label: 'Img', actionType: 'image' },
+  { id: 'align-left', label: 'L', textAlign: 'left' },
+  { id: 'align-center', label: 'C', textAlign: 'center' },
+  { id: 'align-right', label: 'R', textAlign: 'right' },
+  { id: 'format-markdown', label: 'MD', outputFormat: 'markdown' },
+  { id: 'format-html', label: 'HTML', outputFormat: 'html' },
+  { id: 'preview-literal', label: 'Raw', outputPreviewMode: 'literal' },
+  { id: 'preview-rendered', label: 'View', outputPreviewMode: 'rendered' },
 ];
