@@ -77,7 +77,12 @@ export function areStylesEqual(a: FormatStyle, b: FormatStyle): boolean {
     (a.color ?? undefined) === (b.color ?? undefined) &&
     (a.backgroundColor ?? undefined) === (b.backgroundColor ?? undefined) &&
     (a.fontSize ?? undefined) === (b.fontSize ?? undefined) &&
-    (a.heading ?? undefined) === (b.heading ?? undefined)
+    (a.heading ?? undefined) === (b.heading ?? undefined) &&
+    (a.listType ?? undefined) === (b.listType ?? undefined) &&
+    (a.textAlign ?? undefined) === (b.textAlign ?? undefined) &&
+    (a.link ?? undefined) === (b.link ?? undefined) &&
+    (a.imageSrc ?? undefined) === (b.imageSrc ?? undefined) &&
+    (a.imageAlt ?? undefined) === (b.imageAlt ?? undefined)
   );
 }
 

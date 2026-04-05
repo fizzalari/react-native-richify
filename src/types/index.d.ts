@@ -12,9 +12,17 @@ export type HeadingLevel = 'h1' | 'h2' | 'h3' | 'none';
  */
 export type ListType = 'bullet' | 'ordered' | 'none';
 /**
+ * Paragraph alignment presets.
+ */
+export type TextAlign = 'left' | 'center' | 'right';
+/**
  * Serialized output formats supported by the editor.
  */
 export type OutputFormat = 'markdown' | 'html';
+/**
+ * Output preview modes supported by the editor.
+ */
+export type OutputPreviewMode = 'literal' | 'rendered';
 /**
  * Inline formatting styles attached to a text segment.
  */
@@ -28,6 +36,11 @@ export interface FormatStyle {
     backgroundColor?: string;
     fontSize?: number;
     heading?: HeadingLevel;
+    listType?: ListType;
+    textAlign?: TextAlign;
+    link?: string;
+    imageSrc?: string;
+    imageAlt?: string;
 }
 /**
  * A segment of text with uniform formatting.
@@ -69,6 +82,17 @@ export interface RichTextActions {
     setStyleProperty: <K extends keyof FormatStyle>(key: K, value: FormatStyle[K]) => void;
     /** Apply a heading level to the current line. */
     setHeading: (level: HeadingLevel) => void;
+    /** Apply a list style to the current line. */
+    setListType: (type: ListType) => void;
+    /** Apply paragraph alignment to the current line. */
+    setTextAlign: (align: TextAlign) => void;
+    /** Apply or clear a hyperlink on the current selection. */
+    setLink: (url?: string) => void;
+    /** Insert an image placeholder into the document. */
+    insertImage: (source: string, options?: {
+        alt?: string;
+        placeholder?: string;
+    }) => void;
     /** Set the text color for the current selection. */
     setColor: (color: string) => void;
     /** Set the background color for the current selection. */
@@ -119,6 +143,8 @@ export interface RichTextTheme {
     outputLabelStyle?: TextStyle;
     /** Style for the serialized output text. */
     outputTextStyle?: TextStyle;
+    /** Style for the rendered output preview content. */
+    renderedOutputStyle?: ViewStyle;
     /** Style for the toolbar container. */
     toolbarStyle?: ViewStyle;
     /** Style for toolbar buttons. */
@@ -145,6 +171,8 @@ export interface RichTextTheme {
         toolbarBackground?: string;
         /** Toolbar border color. */
         toolbarBorder?: string;
+        /** Default link color. */
+        link?: string;
         /** Cursor / caret color. */
         cursor?: ColorValue;
     };
@@ -161,6 +189,16 @@ export interface ToolbarItem {
     format?: FormatType;
     /** The heading level this button sets. */
     heading?: HeadingLevel;
+    /** The list type this button sets. */
+    listType?: ListType;
+    /** The alignment this button sets. */
+    textAlign?: TextAlign;
+    /** The output format this button toggles to. */
+    outputFormat?: OutputFormat;
+    /** The output preview mode this button toggles to. */
+    outputPreviewMode?: OutputPreviewMode;
+    /** Special toolbar action. */
+    actionType?: 'link' | 'image';
     /** Custom action handler (overrides default behavior). */
     onPress?: () => void;
     /** Whether this item is currently active. */
@@ -183,6 +221,33 @@ export interface ToolbarRenderProps {
     items: ToolbarItem[];
     state: RichTextState;
     actions: RichTextActions;
+    outputFormat: OutputFormat;
+    outputPreviewMode: OutputPreviewMode;
+    onOutputFormatChange: (format: OutputFormat) => void;
+    onOutputPreviewModeChange: (mode: OutputPreviewMode) => void;
+    onRequestLink?: () => void;
+    onRequestImage?: () => void;
+}
+/**
+ * Payload passed when the built-in link button requests a URL.
+ */
+export interface LinkRequestPayload {
+    /** Selected plain text at the time of the request. */
+    selectedText: string;
+    /** Existing URL on the selection, when present. */
+    currentUrl?: string;
+    /** Apply or clear the URL on the current selection. */
+    applyLink: (url?: string) => void;
+}
+/**
+ * Payload passed when the built-in image button requests an image source.
+ */
+export interface ImageRequestPayload {
+    /** Insert an image placeholder into the document. */
+    insertImage: (source: string, options?: {
+        alt?: string;
+        placeholder?: string;
+    }) => void;
 }
 /**
  * Props for the OverlayText component.
@@ -224,6 +289,18 @@ export interface ToolbarProps {
     theme?: RichTextTheme;
     /** Whether to show the toolbar. */
     visible?: boolean;
+    /** Currently selected serialized output format. */
+    outputFormat?: OutputFormat;
+    /** Currently selected preview mode. */
+    outputPreviewMode?: OutputPreviewMode;
+    /** Called when the output format changes from the toolbar. */
+    onOutputFormatChange?: (format: OutputFormat) => void;
+    /** Called when the preview mode changes from the toolbar. */
+    onOutputPreviewModeChange?: (mode: OutputPreviewMode) => void;
+    /** Called when the link button is pressed. */
+    onRequestLink?: () => void;
+    /** Called when the image button is pressed. */
+    onRequestImage?: () => void;
     /** Custom render function for the entire toolbar. */
     renderToolbar?: (props: ToolbarRenderProps) => React.ReactElement | null;
 }
@@ -253,10 +330,26 @@ export interface RichTextInputProps {
     theme?: RichTextTheme;
     /** Whether to show the serialized output preview below the input. */
     showOutputPreview?: boolean;
-    /** Format used for the serialized output preview. */
+    /** Controlled format used for the serialized output preview. */
     outputFormat?: OutputFormat;
+    /** Initial format used for the serialized output preview. */
+    defaultOutputFormat?: OutputFormat;
+    /** Controlled preview mode for the output panel. */
+    outputPreviewMode?: OutputPreviewMode;
+    /** Initial preview mode for the output panel. */
+    defaultOutputPreviewMode?: OutputPreviewMode;
+    /** Maximum height for the output preview panel. */
+    maxOutputHeight?: number;
     /** Callback when the serialized output changes. */
     onChangeOutput?: (output: string, format: OutputFormat) => void;
+    /** Callback when the output format changes. */
+    onChangeOutputFormat?: (format: OutputFormat) => void;
+    /** Callback when the output preview mode changes. */
+    onChangeOutputPreviewMode?: (mode: OutputPreviewMode) => void;
+    /** Invoked when the built-in link button needs a URL. */
+    onRequestLink?: (payload: LinkRequestPayload) => void;
+    /** Invoked when the built-in image button needs an image source. */
+    onRequestImage?: (payload: ImageRequestPayload) => void;
     /** Whether multiline input is enabled. */
     multiline?: boolean;
     /** Minimum height for the input area. */

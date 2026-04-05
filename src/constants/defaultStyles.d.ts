@@ -11,6 +11,7 @@ export declare const DEFAULT_COLORS: {
     readonly toolbarBorder: "#E5E7EB";
     readonly outputBackground: "#F8FAFC";
     readonly outputLabel: "#475569";
+    readonly link: "#2563EB";
     readonly cursor: "#6366F1";
     readonly activeButtonBg: "#EEF2FF";
     readonly codeBackground: "#F3F4F6";
@@ -34,7 +35,7 @@ export declare const DEFAULT_BASE_TEXT_STYLE: {
     readonly fontFamily: undefined;
 };
 /**
- * Empty format style â€” no formatting applied.
+ * Empty format style — no formatting applied.
  */
 export declare const EMPTY_FORMAT_STYLE: FormatStyle;
 /**

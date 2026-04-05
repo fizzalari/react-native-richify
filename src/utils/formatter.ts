@@ -3,7 +3,9 @@ import type {
   FormatType,
   FormatStyle,
   HeadingLevel,
+  ListType,
   SelectionRange,
+  TextAlign,
 } from '../types';
 import {
   createSegment,
@@ -67,14 +69,37 @@ export function setHeadingOnLine(
   selection: SelectionRange,
   level: HeadingLevel,
 ): StyledSegment[] {
-  const plainText = segmentsToPlainText(segments);
-  const { lineStart, lineEnd } = getLineRange(plainText, selection.start);
-
-  const headingStyle: Partial<FormatStyle> = {
+  return setLineStyleOnSelection(segments, selection, {
     heading: level === 'none' ? undefined : level,
-  };
+    listType: level === 'none' ? undefined : undefined,
+  });
+}
 
-  return applyStyleToRange(segments, lineStart, lineEnd, headingStyle);
+/**
+ * Apply a list type to the lines containing the cursor/selection.
+ */
+export function setListTypeOnLine(
+  segments: StyledSegment[],
+  selection: SelectionRange,
+  listType: ListType,
+): StyledSegment[] {
+  return setLineStyleOnSelection(segments, selection, {
+    listType: listType === 'none' ? undefined : listType,
+    heading: listType === 'none' ? undefined : undefined,
+  });
+}
+
+/**
+ * Apply text alignment to the lines containing the cursor/selection.
+ */
+export function setTextAlignOnLine(
+  segments: StyledSegment[],
+  selection: SelectionRange,
+  textAlign: TextAlign,
+): StyledSegment[] {
+  return setLineStyleOnSelection(segments, selection, {
+    textAlign,
+  });
 }
 
 /**
@@ -138,6 +163,11 @@ export function getSelectionStyle(
       result.backgroundColor = undefined;
     if (result.fontSize !== s.fontSize) result.fontSize = undefined;
     if (result.heading !== s.heading) result.heading = undefined;
+    if (result.listType !== s.listType) result.listType = undefined;
+    if (result.textAlign !== s.textAlign) result.textAlign = undefined;
+    if (result.link !== s.link) result.link = undefined;
+    if (result.imageSrc !== s.imageSrc) result.imageSrc = undefined;
+    if (result.imageAlt !== s.imageAlt) result.imageAlt = undefined;
   }
 
   return result;
@@ -248,6 +278,17 @@ function applyStyleToRange(
   return mergeAdjacentSegments(result);
 }
 
+function setLineStyleOnSelection(
+  segments: StyledSegment[],
+  selection: SelectionRange,
+  styleDelta: Partial<FormatStyle>,
+): StyledSegment[] {
+  const plainText = segmentsToPlainText(segments);
+  const { lineStart, lineEnd } = getSelectionLineRange(plainText, selection);
+
+  return applyStyleToRange(segments, lineStart, lineEnd, styleDelta);
+}
+
 /**
  * Get the line start and end positions for the line containing the given position.
  */
@@ -264,6 +305,19 @@ function getLineRange(
   while (lineEnd < text.length && text[lineEnd] !== '\n') {
     lineEnd++;
   }
+
+  return { lineStart, lineEnd };
+}
+
+function getSelectionLineRange(
+  text: string,
+  selection: SelectionRange,
+): { lineStart: number; lineEnd: number } {
+  const normalized = normalizeSelection(selection);
+  const lineStart = getLineRange(text, normalized.start).lineStart;
+  const effectiveEnd =
+    normalized.end > normalized.start ? normalized.end - 1 : normalized.end;
+  const lineEnd = getLineRange(text, effectiveEnd).lineEnd;
 
   return { lineStart, lineEnd };
 }

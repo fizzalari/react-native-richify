@@ -20,7 +20,7 @@ jobs:
     permissions:
       contents: read
     container:
-      image: node:20-alpine
+      image: node:22.14.0-alpine
     defaults:
       run:
         shell: sh
@@ -40,9 +40,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node20-alpine-npm-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-node22.14.0-alpine-npm-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node20-alpine-npm-
+            ${{ runner.os }}-node22.14.0-alpine-npm-
 
       - name: Install dependencies
         run: npm ci --prefer-offline

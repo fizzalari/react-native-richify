@@ -164,6 +164,11 @@ describe('RichTextInput', () => {
     expect(getByPlaceholderText('Type...').props.scrollEnabled).toBe(false);
 
     rerender(<RichTextInput placeholder="Type..." maxHeight={300} />);
+    const input = getByPlaceholderText('Type...');
+    fireEvent(input, 'contentSizeChange', {
+      nativeEvent: { contentSize: { height: 420, width: 200 } },
+    });
+
     expect(getByPlaceholderText('Type...').props.scrollEnabled).toBe(true);
   });
 
@@ -199,6 +204,49 @@ describe('RichTextInput', () => {
     );
 
     expect(queryByText('Markdown output')).toBeNull();
+  });
+
+  it('switches between markdown and html output from the toolbar', () => {
+    const { getByPlaceholderText, getByText } = render(
+      <RichTextInput placeholder="Type..." />,
+    );
+
+    fireEvent.changeText(getByPlaceholderText('Type...'), 'Hello');
+    fireEvent.press(getByText('HTML'));
+
+    expect(getByText('HTML output')).toBeTruthy();
+    expect(getByText('<p>Hello</p>')).toBeTruthy();
+  });
+
+  it('switches between raw output and rendered preview from the toolbar', () => {
+    const { getByText, queryByText } = render(
+      <RichTextInput
+        initialSegments={[createSegment('Title', { heading: 'h1' })]}
+      />,
+    );
+
+    expect(getByText('# Title')).toBeTruthy();
+
+    fireEvent.press(getByText('View'));
+
+    expect(getByText('Markdown preview')).toBeTruthy();
+    expect(queryByText('# Title')).toBeNull();
+    expect(getByText('Title')).toBeTruthy();
+  });
+
+  it('grows the input height before maxHeight is reached', () => {
+    const { getByPlaceholderText } = render(
+      <RichTextInput placeholder="Type..." minHeight={120} />,
+    );
+
+    const input = getByPlaceholderText('Type...');
+    fireEvent(input, 'contentSizeChange', {
+      nativeEvent: { contentSize: { height: 220, width: 200 } },
+    });
+
+    expect(input.props.style).toEqual(
+      expect.arrayContaining([expect.objectContaining({ height: 220 })]),
+    );
   });
 
   it('renders with minHeight', () => {

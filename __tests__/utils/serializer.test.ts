@@ -63,4 +63,44 @@ describe('serializer', () => {
 
     expect(output).toBe('<h3>Title</h3>\n<p>Paragraph</p>');
   });
+
+  it('serializes list items as grouped markdown lists', () => {
+    const output = serializeSegments(
+      [
+        createSegment('One', { listType: 'bullet' }),
+        createSegment('\n'),
+        createSegment('Two', { listType: 'bullet' }),
+      ],
+      'markdown',
+    );
+
+    expect(output).toBe('- One\n- Two');
+  });
+
+  it('serializes links and images', () => {
+    const output = serializeSegments(
+      [
+        createSegment('Docs', { link: 'https://openai.com' }),
+        createSegment('\n'),
+        createSegment('[Image: Hero]', {
+          imageSrc: 'https://cdn.test/hero.png',
+          imageAlt: 'Hero',
+        }),
+      ],
+      'markdown',
+    );
+
+    expect(output).toBe(
+      '[Docs](https://openai.com)\n![Hero](https://cdn.test/hero.png)',
+    );
+  });
+
+  it('uses html block fallback for markdown alignment', () => {
+    const output = serializeSegments(
+      [createSegment('Centered', { textAlign: 'center' })],
+      'markdown',
+    );
+
+    expect(output).toBe('<p style="text-align: center">Centered</p>');
+  });
 });

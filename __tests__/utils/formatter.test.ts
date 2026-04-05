@@ -2,6 +2,8 @@ import {
   toggleFormatOnSelection,
   setStyleOnSelection,
   setHeadingOnLine,
+  setListTypeOnLine,
+  setTextAlignOnLine,
   isFormatActiveInSelection,
   getSelectionStyle,
 } from '../../src/utils/formatter';
@@ -220,6 +222,32 @@ describe('formatter', () => {
       const plain = segmentsToPlainText(result);
       expect(plain).toBe('Line 1\nLine 2\nLine 3');
       // Line 2 should have heading, others should not
+    });
+  });
+
+  describe('setListTypeOnLine', () => {
+    it('applies bullet list formatting to the current line', () => {
+      const segments = [createSegment('Item')];
+      const result = setListTypeOnLine(
+        segments,
+        { start: 0, end: 0 },
+        'bullet',
+      );
+
+      expect(result[0].styles.listType).toBe('bullet');
+    });
+  });
+
+  describe('setTextAlignOnLine', () => {
+    it('applies text alignment to the current line', () => {
+      const segments = [createSegment('Centered')];
+      const result = setTextAlignOnLine(
+        segments,
+        { start: 0, end: 0 },
+        'center',
+      );
+
+      expect(result[0].styles.textAlign).toBe('center');
     });
   });
 

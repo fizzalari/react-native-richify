@@ -2,10 +2,12 @@ import { useState, useCallback, useRef } from 'react';
 import type {
   StyledSegment,
   FormatStyle,
+  ListType,
   OutputFormat,
   SelectionRange,
   RichTextState,
   RichTextActions,
+  TextAlign,
   UseRichTextReturn,
 } from '../types';
 import { EMPTY_FORMAT_STYLE } from '../constants/defaultStyles';
@@ -91,10 +93,11 @@ export function useRichText(
     (newText: string) => {
       const currentSegments = segmentsRef.current;
       const currentSelection = selectionRef.current;
-      const currentActiveStyles =
+      const currentActiveStyles = sanitizeTypingStyles(
         currentSelection.start === currentSelection.end
           ? activeStylesRef.current
-          : getSelectionStyle(currentSegments, currentSelection);
+          : getSelectionStyle(currentSegments, currentSelection),
+      );
 
       const newSegments = reconcileTextChange(
         currentSegments,
@@ -135,7 +138,7 @@ export function useRichText(
         );
         if (segmentsRef.current.length > 0) {
           const seg = segmentsRef.current[pos.segmentIndex];
-          setActiveStyles({ ...seg.styles });
+          setActiveStyles(sanitizeTypingStyles(seg.styles));
         }
       }
     },
@@ -164,15 +167,18 @@ export function useRichText(
       const safeSegments =
         newSegments.length > 0 ? newSegments : [createSegment('')];
       updateSegments(safeSegments);
+      handleSelectionChange({ start: 0, end: 0 });
+      setActiveStyles({ ...EMPTY_FORMAT_STYLE });
     },
-    [updateSegments],
+    [handleSelectionChange, updateSegments],
   );
 
   const clear = useCallback(() => {
     updateSegments([createSegment('')]);
+    handleSelectionChange({ start: 0, end: 0 });
     setActiveStyles({ ...EMPTY_FORMAT_STYLE });
     preserveActiveStylesRef.current = false;
-  }, [updateSegments]);
+  }, [handleSelectionChange, updateSegments]);
 
   const toggleFormat = useCallback<RichTextActions['toggleFormat']>(
     (format) => {
@@ -200,6 +206,36 @@ export function useRichText(
         preserveActiveStylesRef.current = true;
       }
       formatting.setHeading(level);
+    },
+    [formatting],
+  );
+
+  const setListType = useCallback<RichTextActions['setListType']>(
+    (type: ListType) => {
+      if (selectionRef.current.start === selectionRef.current.end) {
+        preserveActiveStylesRef.current = true;
+      }
+      formatting.setListType(type);
+    },
+    [formatting],
+  );
+
+  const setTextAlign = useCallback<RichTextActions['setTextAlign']>(
+    (align: TextAlign) => {
+      if (selectionRef.current.start === selectionRef.current.end) {
+        preserveActiveStylesRef.current = true;
+      }
+      formatting.setTextAlign(align);
+    },
+    [formatting],
+  );
+
+  const setLink = useCallback<RichTextActions['setLink']>(
+    (url) => {
+      if (selectionRef.current.start === selectionRef.current.end) {
+        preserveActiveStylesRef.current = true;
+      }
+      formatting.setLink(url);
     },
     [formatting],
   );
@@ -234,6 +270,41 @@ export function useRichText(
     [formatting],
   );
 
+  const insertImage = useCallback<RichTextActions['insertImage']>(
+    (source, options) => {
+      const currentSegments = segmentsRef.current;
+      const currentSelection = selectionRef.current;
+      const plainText = segmentsToPlainText(currentSegments);
+      const start = Math.min(currentSelection.start, currentSelection.end);
+      const end = Math.max(currentSelection.start, currentSelection.end);
+      const placeholder =
+        options?.placeholder ?? buildImagePlaceholder(source, options?.alt);
+      const nextText = `${plainText.slice(0, start)}${placeholder}${plainText.slice(end)}`;
+      const insertionStyles = sanitizeTypingStyles(
+        start === end
+          ? activeStylesRef.current
+          : getSelectionStyle(currentSegments, currentSelection),
+      );
+      const nextSegments = reconcileTextChange(
+        currentSegments,
+        nextText,
+        {
+          ...insertionStyles,
+          imageSrc: source,
+          imageAlt: options?.alt,
+        },
+      );
+
+      updateSegments(nextSegments);
+      handleSelectionChange({
+        start: start + placeholder.length,
+        end: start + placeholder.length,
+      });
+      preserveActiveStylesRef.current = false;
+    },
+    [handleSelectionChange, updateSegments],
+  );
+
   // ─── Build Return Value ──────────────────────────────────────────────────
 
   const state: RichTextState = {
@@ -246,6 +317,10 @@ export function useRichText(
     toggleFormat,
     setStyleProperty,
     setHeading,
+    setListType,
+    setTextAlign,
+    setLink,
+    insertImage,
     setColor,
     setBackgroundColor,
     setFontSize,
@@ -261,4 +336,25 @@ export function useRichText(
   };
 
   return { state, actions };
+}
+
+function sanitizeTypingStyles(style: FormatStyle): FormatStyle {
+  return {
+    ...style,
+    imageSrc: undefined,
+    imageAlt: undefined,
+  };
+}
+
+function buildImagePlaceholder(source: string, alt?: string): string {
+  if (alt && alt.trim().length > 0) {
+    return `[Image: ${alt.trim()}]`;
+  }
+
+  const fileName = source.split('/').pop()?.split('?')[0]?.trim();
+  if (fileName) {
+    return `[Image: ${fileName}]`;
+  }
+
+  return '[Image]';
 }
