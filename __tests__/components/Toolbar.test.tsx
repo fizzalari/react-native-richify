@@ -16,6 +16,7 @@ const mockActions: RichTextActions = {
   handleSelectionChange: jest.fn(),
   isFormatActive: jest.fn(() => false),
   getSelectionStyle: jest.fn(() => ({ ...EMPTY_FORMAT_STYLE })),
+  getOutput: jest.fn(() => ''),
   getPlainText: jest.fn(() => ''),
   exportJSON: jest.fn(() => []),
   importJSON: jest.fn(),

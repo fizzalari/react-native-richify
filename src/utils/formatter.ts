@@ -8,11 +8,9 @@ import type {
 import {
   createSegment,
   findPositionInSegments,
-  splitSegment,
   mergeAdjacentSegments,
   segmentsToPlainText,
 } from '../utils/parser';
-import { HEADING_FONT_SIZES } from '../constants/defaultStyles';
 
 /**
  * Toggle an inline format (bold, italic, etc.) on the selected range.
@@ -73,9 +71,7 @@ export function setHeadingOnLine(
   const { lineStart, lineEnd } = getLineRange(plainText, selection.start);
 
   const headingStyle: Partial<FormatStyle> = {
-    heading: level,
-    fontSize: HEADING_FONT_SIZES[level],
-    bold: level !== 'none' ? true : undefined,
+    heading: level === 'none' ? undefined : level,
   };
 
   return applyStyleToRange(segments, lineStart, lineEnd, headingStyle);

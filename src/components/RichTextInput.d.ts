@@ -1,20 +1,9 @@
 import React from 'react';
 import type { RichTextInputProps } from '../types';
 /**
- * RichTextInput — The main rich text editor component.
+ * RichTextInput â€” The main rich text editor component.
  *
- * Uses the Overlay Technique:
- * - A transparent `TextInput` on top captures user input and selection
- * - A styled `<Text>` layer behind it renders the formatted content
- * - Both share identical font metrics for pixel-perfect alignment
- *
- * @example
- * ```tsx
- * <RichTextInput
- *   placeholder="Start typing..."
- *   showToolbar
- *   onChangeSegments={(segments) => console.log(segments)}
- * />
- * ```
+ * Uses a plain `TextInput` for editing and renders the serialized rich output
+ * below it as Markdown or HTML.
  */
 export declare const RichTextInput: React.FC<RichTextInputProps>;

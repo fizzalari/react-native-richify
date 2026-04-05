@@ -12,6 +12,10 @@ export type HeadingLevel = 'h1' | 'h2' | 'h3' | 'none';
  */
 export type ListType = 'bullet' | 'ordered' | 'none';
 /**
+ * Serialized output formats supported by the editor.
+ */
+export type OutputFormat = 'markdown' | 'html';
+/**
  * Inline formatting styles attached to a text segment.
  */
 export interface FormatStyle {
@@ -79,6 +83,8 @@ export interface RichTextActions {
     isFormatActive: (format: FormatType) => boolean;
     /** Get the effective shared style at the current cursor/selection. */
     getSelectionStyle: () => FormatStyle;
+    /** Serialize the current content as markdown or HTML. */
+    getOutput: (format?: OutputFormat) => string;
     /** Get the full plain text content. */
     getPlainText: () => string;
     /** Export the segments as a serializable JSON array. */
@@ -103,10 +109,16 @@ export interface RichTextTheme {
     containerStyle?: ViewStyle;
     /** Style for the TextInput. */
     inputStyle?: TextStyle;
-    /** Style for the overlay text container. */
+    /** Style for the legacy overlay text container. */
     overlayContainerStyle?: ViewStyle;
     /** Base text style applied to all segments before formatting. */
     baseTextStyle?: TextStyle;
+    /** Style for the serialized output container. */
+    outputContainerStyle?: ViewStyle;
+    /** Label style for the serialized output header. */
+    outputLabelStyle?: TextStyle;
+    /** Style for the serialized output text. */
+    outputTextStyle?: TextStyle;
     /** Style for the toolbar container. */
     toolbarStyle?: ViewStyle;
     /** Style for toolbar buttons. */
@@ -239,6 +251,12 @@ export interface RichTextInputProps {
     toolbarItems?: ToolbarItem[];
     /** Theme configuration. */
     theme?: RichTextTheme;
+    /** Whether to show the serialized output preview below the input. */
+    showOutputPreview?: boolean;
+    /** Format used for the serialized output preview. */
+    outputFormat?: OutputFormat;
+    /** Callback when the serialized output changes. */
+    onChangeOutput?: (output: string, format: OutputFormat) => void;
     /** Whether multiline input is enabled. */
     multiline?: boolean;
     /** Minimum height for the input area. */

@@ -64,6 +64,36 @@ describe('useRichText', () => {
       expect(onChangeSegments).toHaveBeenCalled();
     });
 
+    it('preserves active styles while typing in the middle of text', () => {
+      const { result } = renderHook(() =>
+        useRichText({
+          initialSegments: [createSegment('HelloWorld')],
+        }),
+      );
+
+      act(() => {
+        result.current.actions.handleSelectionChange({ start: 5, end: 5 });
+      });
+
+      act(() => {
+        result.current.actions.toggleFormat('bold');
+      });
+
+      act(() => {
+        result.current.actions.handleSelectionChange({ start: 6, end: 6 });
+        result.current.actions.handleTextChange('HelloaWorld');
+      });
+
+      act(() => {
+        result.current.actions.handleSelectionChange({ start: 7, end: 7 });
+        result.current.actions.handleTextChange('HelloabWorld');
+      });
+
+      expect(result.current.actions.getOutput('markdown')).toBe(
+        'Hello**ab**World',
+      );
+    });
+
     it('inherits selection styles when replacing selected text', () => {
       const { result } = renderHook(() =>
         useRichText({
@@ -84,6 +114,17 @@ describe('useRichText', () => {
 
       expect(result.current.state.segments[0].text).toBe('X');
       expect(result.current.state.segments[0].styles.bold).toBe(true);
+    });
+
+    it('serializes output as markdown or HTML', () => {
+      const { result } = renderHook(() =>
+        useRichText({
+          initialSegments: [createSegment('Title', { heading: 'h1' })],
+        }),
+      );
+
+      expect(result.current.actions.getOutput('markdown')).toBe('# Title');
+      expect(result.current.actions.getOutput('html')).toBe('<h1>Title</h1>');
     });
   });
 
@@ -234,6 +275,21 @@ describe('useRichText', () => {
       });
 
       expect(result.current.state.segments[0].styles.heading).toBe('h1');
+    });
+
+    it('stores heading as an active style for future typing', () => {
+      const { result } = renderHook(() => useRichText());
+
+      act(() => {
+        result.current.actions.setHeading('h3');
+      });
+
+      act(() => {
+        result.current.actions.handleSelectionChange({ start: 1, end: 1 });
+        result.current.actions.handleTextChange('A');
+      });
+
+      expect(result.current.actions.getOutput('markdown')).toBe('### A');
     });
   });
 

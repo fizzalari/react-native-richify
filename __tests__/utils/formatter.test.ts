@@ -174,8 +174,6 @@ describe('formatter', () => {
       );
 
       expect(result[0].styles.heading).toBe('h1');
-      expect(result[0].styles.fontSize).toBe(32);
-      expect(result[0].styles.bold).toBe(true);
     });
 
     it('applies h2 heading', () => {
@@ -187,7 +185,6 @@ describe('formatter', () => {
       );
 
       expect(result[0].styles.heading).toBe('h2');
-      expect(result[0].styles.fontSize).toBe(24);
     });
 
     it('applies h3 heading', () => {
@@ -199,19 +196,17 @@ describe('formatter', () => {
       );
 
       expect(result[0].styles.heading).toBe('h3');
-      expect(result[0].styles.fontSize).toBe(20);
     });
 
     it('removes heading when set to none', () => {
-      const segments = [createSegment('Title', { heading: 'h1', fontSize: 32, bold: true })];
+      const segments = [createSegment('Title', { heading: 'h1' })];
       const result = setHeadingOnLine(
         segments,
         { start: 0, end: 0 },
         'none',
       );
 
-      expect(result[0].styles.heading).toBe('none');
-      expect(result[0].styles.fontSize).toBe(16);
+      expect(result[0].styles.heading).toBeUndefined();
     });
 
     it('only affects the line at cursor in multi-line text', () => {

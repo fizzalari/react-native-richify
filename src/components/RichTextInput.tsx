@@ -1,34 +1,35 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo, useRef } from 'react';
 import {
-  View,
-  TextInput,
+  Animated,
+  Easing,
+  ScrollView,
   StyleSheet,
+  Text,
+  TextInput,
+  View,
   type NativeSyntheticEvent,
   type TextInputSelectionChangeEventData,
 } from 'react-native';
 import type { RichTextInputProps } from '../types';
 import { DEFAULT_THEME } from '../constants/defaultStyles';
-import { segmentsToPlainText } from '../utils/parser';
 import { useRichText } from '../hooks/useRichText';
-import { OverlayText } from './OverlayText';
+import { segmentsToPlainText } from '../utils/parser';
+import { serializeSegments } from '../utils/serializer';
 import { Toolbar } from './Toolbar';
+
+const OUTPUT_PANEL_HEIGHT = 180;
+const isJestRuntime =
+  typeof (
+    globalThis as {
+      process?: { env?: { JEST_WORKER_ID?: string } };
+    }
+  ).process?.env?.JEST_WORKER_ID === 'string';
 
 /**
  * RichTextInput — The main rich text editor component.
  *
- * Uses the Overlay Technique:
- * - A transparent `TextInput` on top captures user input and selection
- * - A styled `<Text>` layer behind it renders the formatted content
- * - Both share identical font metrics for pixel-perfect alignment
- *
- * @example
- * ```tsx
- * <RichTextInput
- *   placeholder="Start typing..."
- *   showToolbar
- *   onChangeSegments={(segments) => console.log(segments)}
- * />
- * ```
+ * Uses a plain `TextInput` for editing and renders the serialized rich output
+ * below it as Markdown or HTML.
  */
 export const RichTextInput: React.FC<RichTextInputProps> = ({
   initialSegments,
@@ -41,6 +42,9 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
   toolbarPosition = 'top',
   toolbarItems,
   theme,
+  showOutputPreview = true,
+  outputFormat = 'markdown',
+  onChangeOutput,
   multiline = true,
   minHeight = 120,
   maxHeight,
@@ -50,6 +54,7 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
   onReady,
 }) => {
   const resolvedTheme = theme ?? DEFAULT_THEME;
+  const previewProgress = useRef(new Animated.Value(0)).current;
 
   const { state, actions } = useRichText({
     initialSegments,
@@ -57,15 +62,35 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
     onChangeText,
   });
 
-  // Expose actions via onReady callback
   useEffect(() => {
     onReady?.(actions);
-  }, [onReady, actions]);
+  }, [actions, onReady]);
 
-  // Build plain text for the TextInput value
   const plainText = segmentsToPlainText(state.segments);
+  const serializedOutput = useMemo(
+    () => serializeSegments(state.segments, outputFormat),
+    [outputFormat, state.segments],
+  );
+  const shouldShowOutputPreview = showOutputPreview && plainText.length > 0;
 
-  // Handle selection change from TextInput
+  useEffect(() => {
+    onChangeOutput?.(serializedOutput, outputFormat);
+  }, [onChangeOutput, outputFormat, serializedOutput]);
+
+  useEffect(() => {
+    if (isJestRuntime) {
+      previewProgress.setValue(shouldShowOutputPreview ? 1 : 0);
+      return;
+    }
+
+    Animated.timing(previewProgress, {
+      toValue: shouldShowOutputPreview ? 1 : 0,
+      duration: 180,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+  }, [previewProgress, shouldShowOutputPreview]);
+
   const onSelectionChange = useCallback(
     (e: NativeSyntheticEvent<TextInputSelectionChangeEventData>) => {
       const { start, end } = e.nativeEvent.selection;
@@ -74,28 +99,49 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
     [actions],
   );
 
-  // Container style
   const containerStyle = [
     resolvedTheme.containerStyle ?? DEFAULT_THEME.containerStyle,
   ];
-
-  // Input area style
   const inputAreaStyle = [
     styles.inputArea,
     { minHeight },
     maxHeight ? { maxHeight } : undefined,
   ];
-
-  // Input style
   const inputStyle = [
     styles.textInput,
     resolvedTheme.baseTextStyle ?? DEFAULT_THEME.baseTextStyle,
     resolvedTheme.inputStyle ?? DEFAULT_THEME.inputStyle,
     textInputProps?.style,
-    styles.hiddenInputText,
+  ];
+  const outputAnimatedStyle = {
+    maxHeight: previewProgress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, OUTPUT_PANEL_HEIGHT],
+    }),
+    opacity: previewProgress,
+    marginTop: previewProgress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, 12],
+    }),
+    transform: [
+      {
+        translateY: previewProgress.interpolate({
+          inputRange: [0, 1],
+          outputRange: [-8, 0],
+        }),
+      },
+    ],
+  };
+  const outputContainerStyle = [
+    resolvedTheme.outputContainerStyle ?? DEFAULT_THEME.outputContainerStyle,
+  ];
+  const outputLabelStyle = [
+    resolvedTheme.outputLabelStyle ?? DEFAULT_THEME.outputLabelStyle,
+  ];
+  const outputTextStyle = [
+    resolvedTheme.outputTextStyle ?? DEFAULT_THEME.outputTextStyle,
   ];
 
-  // Toolbar component
   const toolbarComponent = showToolbar ? (
     <Toolbar
       actions={actions}
@@ -106,29 +152,28 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
     />
   ) : null;
 
-  // Toolbar border
   const toolbarBorderStyle =
     toolbarPosition === 'top'
-      ? { borderBottomWidth: 1, borderBottomColor: resolvedTheme.colors?.toolbarBorder ?? DEFAULT_THEME.colors?.toolbarBorder }
-      : { borderTopWidth: 1, borderTopColor: resolvedTheme.colors?.toolbarBorder ?? DEFAULT_THEME.colors?.toolbarBorder };
+      ? {
+          borderBottomWidth: 1,
+          borderBottomColor:
+            resolvedTheme.colors?.toolbarBorder ??
+            DEFAULT_THEME.colors?.toolbarBorder,
+        }
+      : {
+          borderTopWidth: 1,
+          borderTopColor:
+            resolvedTheme.colors?.toolbarBorder ??
+            DEFAULT_THEME.colors?.toolbarBorder,
+        };
 
   return (
     <View style={containerStyle}>
-      {/* Toolbar — Top */}
       {toolbarPosition === 'top' && toolbarComponent && (
         <View style={toolbarBorderStyle}>{toolbarComponent}</View>
       )}
 
-      {/* Editor Area */}
       <View style={inputAreaStyle}>
-        {/* Overlay — Styled text rendering (behind TextInput) */}
-        <OverlayText
-          segments={state.segments}
-          baseTextStyle={resolvedTheme.baseTextStyle}
-          theme={resolvedTheme}
-        />
-
-        {/* TextInput — Transparent layer on top for input capture */}
         <TextInput
           {...textInputProps}
           style={inputStyle}
@@ -144,16 +189,32 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
           editable={editable}
           maxLength={maxLength}
           autoFocus={autoFocus}
-          underlineColorAndroid="transparent"
           selectionColor={
             resolvedTheme.colors?.cursor ?? DEFAULT_THEME.colors?.cursor
           }
           textAlignVertical="top"
           scrollEnabled={typeof maxHeight === 'number'}
         />
+
+        {showOutputPreview && (
+          <Animated.View
+            pointerEvents={shouldShowOutputPreview ? 'auto' : 'none'}
+            style={[styles.outputAnimatedWrapper, outputAnimatedStyle]}
+          >
+            <View style={outputContainerStyle}>
+              <Text style={outputLabelStyle}>
+                {outputFormat === 'html' ? 'HTML output' : 'Markdown output'}
+              </Text>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <Text selectable style={outputTextStyle}>
+                  {serializedOutput}
+                </Text>
+              </ScrollView>
+            </View>
+          </Animated.View>
+        )}
       </View>
 
-      {/* Toolbar — Bottom */}
       {toolbarPosition === 'bottom' && toolbarComponent && (
         <View style={toolbarBorderStyle}>{toolbarComponent}</View>
       )}
@@ -169,12 +230,8 @@ const styles = StyleSheet.create({
   },
   textInput: {
     position: 'relative',
-    zIndex: 1,
   },
-  hiddenInputText: {
-    // Keep the editable layer invisible while preserving the caret.
-    color: 'transparent',
-    backgroundColor: 'transparent',
-    textShadowColor: 'transparent',
+  outputAnimatedWrapper: {
+    overflow: 'hidden',
   },
 });
