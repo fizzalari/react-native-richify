@@ -1,7 +1,7 @@
 {
   "name": "react-native-richify",
   "version": "1.0.6",
-  "description": "A production-grade, fully customizable React Native Rich Text Input using the Overlay Technique — no WebView required.",
+  "description": "A customizable React Native rich text input with a native toolbar and Markdown or HTML output.",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
   "types": "lib/typescript/src/index.d.ts",
@@ -29,7 +29,8 @@
     "text-input",
     "rich-text-editor",
     "formatted-text",
-    "overlay-technique",
+    "markdown",
+    "html",
     "typescript",
     "customizable",
     "no-webview"
@@ -60,12 +61,14 @@
     "react": "^19.2.4",
     "react-native": "^0.84.1",
     "react-native-builder-bob": "^0.41.0",
+    "react-native-svg": "^15.15.4",
     "react-test-renderer": "^19.2.4",
     "typescript": "^6.0.2"
   },
   "peerDependencies": {
     "react": ">=19.0.0",
-    "react-native": ">=0.84.0"
+    "react-native": ">=0.84.0",
+    "react-native-svg": "^12.0.0 || ^13.0.0 || ^14.0.0 || ^15.0.0"
   },
   "react-native-builder-bob": {
     "source": "src",
@@ -80,5 +83,8 @@
         }
       ]
     ]
+  },
+  "dependencies": {
+    "lucide-react-native": "^1.7.0"
   }
 }

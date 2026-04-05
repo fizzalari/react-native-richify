@@ -48,49 +48,59 @@ describe('Toolbar', () => {
   });
 
   it('renders default toolbar items', () => {
-    const { getByText } = render(
+    const { getByLabelText, getByText } = render(
       <Toolbar actions={mockActions} state={mockState} />,
     );
 
-    expect(getByText('B')).toBeTruthy();
-    expect(getByText('I')).toBeTruthy();
-    expect(getByText('U')).toBeTruthy();
-    expect(getByText('S')).toBeTruthy();
-    expect(getByText('<>')).toBeTruthy();
-    expect(getByText('H1')).toBeTruthy();
-    expect(getByText('🔗')).toBeTruthy();
-    expect(getByText('⇤')).toBeTruthy();
-    expect(getByText('↔')).toBeTruthy();
-    expect(getByText('⇥')).toBeTruthy();
-  });
-
-  it('does not render the image button in the default toolbar', () => {
-    const { queryByText } = render(
-      <Toolbar actions={mockActions} state={mockState} />,
-    );
-
-    expect(queryByText('Img')).toBeNull();
+    expect(getByLabelText('Bold')).toBeTruthy();
+    expect(getByLabelText('Italic')).toBeTruthy();
+    expect(getByLabelText('Underline')).toBeTruthy();
+    expect(getByLabelText('Strikethrough')).toBeTruthy();
+    expect(getByLabelText('Code')).toBeTruthy();
+    expect(getByLabelText('Heading 1')).toBeTruthy();
+    expect(getByLabelText('Bullet list')).toBeTruthy();
+    expect(getByLabelText('Ordered list')).toBeTruthy();
+    expect(getByLabelText('Link')).toBeTruthy();
+    expect(getByLabelText('Insert image')).toBeTruthy();
+    expect(getByLabelText('Align left')).toBeTruthy();
+    expect(getByLabelText('Align center')).toBeTruthy();
+    expect(getByLabelText('Align right')).toBeTruthy();
+    expect(getByText('MD')).toBeTruthy();
   });
 
   it('calls toggleFormat when format button is pressed', () => {
-    const { getByText } = render(
+    const { getByLabelText } = render(
       <Toolbar actions={mockActions} state={mockState} />,
     );
 
-    fireEvent.press(getByText('B'));
+    fireEvent.press(getByLabelText('Bold'));
     expect(mockActions.toggleFormat).toHaveBeenCalledWith('bold');
 
-    fireEvent.press(getByText('I'));
+    fireEvent.press(getByLabelText('Italic'));
     expect(mockActions.toggleFormat).toHaveBeenCalledWith('italic');
   });
 
   it('calls setHeading when heading button is pressed', () => {
-    const { getByText } = render(
+    const { getByLabelText } = render(
       <Toolbar actions={mockActions} state={mockState} />,
     );
 
-    fireEvent.press(getByText('H1'));
+    fireEvent.press(getByLabelText('Heading 1'));
     expect(mockActions.setHeading).toHaveBeenCalledWith('h1');
+  });
+
+  it('calls image request handler when the image button is pressed', () => {
+    const onRequestImage = jest.fn();
+    const { getByLabelText } = render(
+      <Toolbar
+        actions={mockActions}
+        state={mockState}
+        onRequestImage={onRequestImage}
+      />,
+    );
+
+    fireEvent.press(getByLabelText('Insert image'));
+    expect(onRequestImage).toHaveBeenCalled();
   });
 
   it('renders custom toolbar items', () => {

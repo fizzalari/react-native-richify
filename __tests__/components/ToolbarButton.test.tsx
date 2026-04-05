@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { ToolbarButton } from '../../src/components/ToolbarButton';
 import { Text } from 'react-native';
+import { Bold } from 'lucide-react-native';
 
 describe('ToolbarButton', () => {
   const defaultProps = {
@@ -75,5 +76,17 @@ describe('ToolbarButton', () => {
       );
       expect(getByText(label)).toBeTruthy();
     });
+  });
+
+  it('renders icon content with an accessibility label', () => {
+    const { getByLabelText } = render(
+      <ToolbarButton
+        {...defaultProps}
+        label={<Bold />}
+        accessibilityLabel="Bold"
+      />,
+    );
+
+    expect(getByLabelText('Bold')).toBeTruthy();
   });
 });

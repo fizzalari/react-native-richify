@@ -29,16 +29,15 @@ describe('RichTextInput', () => {
   });
 
   it('renders toolbar by default', () => {
-    const { getByText } = render(<RichTextInput />);
-    // Default toolbar should have Bold button
-    expect(getByText('B')).toBeTruthy();
+    const { getByLabelText } = render(<RichTextInput />);
+    expect(getByLabelText('Bold')).toBeTruthy();
   });
 
   it('hides toolbar when showToolbar is false', () => {
-    const { queryByText } = render(
+    const { queryByLabelText } = render(
       <RichTextInput showToolbar={false} />,
     );
-    expect(queryByText('B')).toBeNull();
+    expect(queryByLabelText('Bold')).toBeNull();
   });
 
   it('handles text input', () => {
