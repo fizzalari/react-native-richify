@@ -139,6 +139,18 @@ describe('useFormatting', () => {
 
       expect(onSegmentsChange).toHaveBeenCalled();
     });
+
+    it('updates active heading when no text is selected', () => {
+      const { hook, onActiveStylesChange } = createFormattingHook();
+
+      act(() => {
+        hook.result.current.setHeading('h2');
+      });
+
+      expect(onActiveStylesChange).toHaveBeenCalledWith(
+        expect.objectContaining({ heading: 'h2' }),
+      );
+    });
   });
 
   describe('isFormatActive', () => {

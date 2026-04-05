@@ -37,6 +37,11 @@ export {
   segmentToTextStyle,
   segmentsToTextStyles,
 } from './utils/styleMapper';
+export {
+  serializeSegments,
+  segmentsToMarkdown,
+  segmentsToHTML,
+} from './utils/serializer';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 export {
@@ -53,6 +58,7 @@ export type {
   FormatType,
   HeadingLevel,
   ListType,
+  OutputFormat,
   FormatStyle,
   StyledSegment,
   SelectionRange,

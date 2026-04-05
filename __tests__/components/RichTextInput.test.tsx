@@ -118,6 +118,7 @@ describe('RichTextInput', () => {
     const actions = onReady.mock.calls[0][0];
     expect(actions.toggleFormat).toBeDefined();
     expect(actions.handleTextChange).toBeDefined();
+    expect(actions.getOutput).toBeDefined();
     expect(actions.exportJSON).toBeDefined();
     expect(actions.clear).toBeDefined();
   });
@@ -138,7 +139,7 @@ describe('RichTextInput', () => {
     expect(input.props.maxLength).toBe(100);
   });
 
-  it('keeps the editable text hidden while merging caller styles', () => {
+  it('keeps caller text input styles on the visible input', () => {
     const { getByPlaceholderText } = render(
       <RichTextInput
         placeholder="Type..."
@@ -150,7 +151,7 @@ describe('RichTextInput', () => {
     expect(input.props.style).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ letterSpacing: 2 }),
-        expect.objectContaining({ color: 'transparent' }),
+        expect.objectContaining({ color: expect.any(String) }),
       ]),
     );
   });
@@ -164,6 +165,40 @@ describe('RichTextInput', () => {
 
     rerender(<RichTextInput placeholder="Type..." maxHeight={300} />);
     expect(getByPlaceholderText('Type...').props.scrollEnabled).toBe(true);
+  });
+
+  it('shows markdown output below the input as content changes', () => {
+    const { getByPlaceholderText, getByText } = render(
+      <RichTextInput placeholder="Type..." />,
+    );
+
+    fireEvent.changeText(getByPlaceholderText('Type...'), 'Hello');
+
+    expect(getByText('Markdown output')).toBeTruthy();
+    expect(getByText('Hello')).toBeTruthy();
+  });
+
+  it('renders HTML output when requested', () => {
+    const { getByText } = render(
+      <RichTextInput
+        outputFormat="html"
+        initialSegments={[createSegment('Title', { heading: 'h1' })]}
+      />,
+    );
+
+    expect(getByText('HTML output')).toBeTruthy();
+    expect(getByText('<h1>Title</h1>')).toBeTruthy();
+  });
+
+  it('hides the output panel when showOutputPreview is false', () => {
+    const { queryByText } = render(
+      <RichTextInput
+        showOutputPreview={false}
+        initialSegments={[createSegment('Hello')]}
+      />,
+    );
+
+    expect(queryByText('Markdown output')).toBeNull();
   });
 
   it('renders with minHeight', () => {

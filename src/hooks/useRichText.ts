@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import type {
   StyledSegment,
   FormatStyle,
+  OutputFormat,
   SelectionRange,
   RichTextState,
   RichTextActions,
@@ -15,6 +16,7 @@ import {
   findPositionInSegments,
 } from '../utils/parser';
 import { getSelectionStyle } from '../utils/formatter';
+import { serializeSegments } from '../utils/serializer';
 import { useSelection } from '../hooks/useSelection';
 import { useFormatting } from '../hooks/useFormatting';
 
@@ -60,6 +62,7 @@ export function useRichText(
   selectionRef.current = selection;
   const activeStylesRef = useRef(activeStyles);
   activeStylesRef.current = activeStyles;
+  const preserveActiveStylesRef = useRef(false);
 
   // ─── Segment Change Handler ──────────────────────────────────────────────
 
@@ -108,7 +111,21 @@ export function useRichText(
 
   const onSelectionChange = useCallback(
     (newSelection: SelectionRange) => {
+      const previousSelection = selectionRef.current;
       handleSelectionChange(newSelection);
+
+      const shouldPreserveActiveStyles =
+        preserveActiveStylesRef.current &&
+        previousSelection.start === previousSelection.end &&
+        newSelection.start === newSelection.end &&
+        newSelection.start >= previousSelection.start &&
+        newSelection.start - previousSelection.start <= 1;
+
+      if (shouldPreserveActiveStyles) {
+        return;
+      }
+
+      preserveActiveStylesRef.current = false;
 
       // Update active styles based on cursor position
       if (newSelection.start === newSelection.end) {
@@ -131,6 +148,13 @@ export function useRichText(
     return segmentsToPlainText(segmentsRef.current);
   }, []);
 
+  const getOutput = useCallback(
+    (format: OutputFormat = 'markdown'): string => {
+      return serializeSegments(segmentsRef.current, format);
+    },
+    [],
+  );
+
   const exportJSON = useCallback((): StyledSegment[] => {
     return JSON.parse(JSON.stringify(segmentsRef.current));
   }, []);
@@ -147,7 +171,68 @@ export function useRichText(
   const clear = useCallback(() => {
     updateSegments([createSegment('')]);
     setActiveStyles({ ...EMPTY_FORMAT_STYLE });
+    preserveActiveStylesRef.current = false;
   }, [updateSegments]);
+
+  const toggleFormat = useCallback<RichTextActions['toggleFormat']>(
+    (format) => {
+      if (selectionRef.current.start === selectionRef.current.end) {
+        preserveActiveStylesRef.current = true;
+      }
+      formatting.toggleFormat(format);
+    },
+    [formatting],
+  );
+
+  const setStyleProperty = useCallback<RichTextActions['setStyleProperty']>(
+    (key, value) => {
+      if (selectionRef.current.start === selectionRef.current.end) {
+        preserveActiveStylesRef.current = true;
+      }
+      formatting.setStyleProperty(key, value);
+    },
+    [formatting],
+  );
+
+  const setHeading = useCallback<RichTextActions['setHeading']>(
+    (level) => {
+      if (selectionRef.current.start === selectionRef.current.end) {
+        preserveActiveStylesRef.current = true;
+      }
+      formatting.setHeading(level);
+    },
+    [formatting],
+  );
+
+  const setColor = useCallback<RichTextActions['setColor']>(
+    (color) => {
+      if (selectionRef.current.start === selectionRef.current.end) {
+        preserveActiveStylesRef.current = true;
+      }
+      formatting.setColor(color);
+    },
+    [formatting],
+  );
+
+  const setBackgroundColor = useCallback<RichTextActions['setBackgroundColor']>(
+    (color) => {
+      if (selectionRef.current.start === selectionRef.current.end) {
+        preserveActiveStylesRef.current = true;
+      }
+      formatting.setBackgroundColor(color);
+    },
+    [formatting],
+  );
+
+  const setFontSize = useCallback<RichTextActions['setFontSize']>(
+    (size) => {
+      if (selectionRef.current.start === selectionRef.current.end) {
+        preserveActiveStylesRef.current = true;
+      }
+      formatting.setFontSize(size);
+    },
+    [formatting],
+  );
 
   // ─── Build Return Value ──────────────────────────────────────────────────
 
@@ -158,16 +243,17 @@ export function useRichText(
   };
 
   const actions: RichTextActions = {
-    toggleFormat: formatting.toggleFormat,
-    setStyleProperty: formatting.setStyleProperty,
-    setHeading: formatting.setHeading,
-    setColor: formatting.setColor,
-    setBackgroundColor: formatting.setBackgroundColor,
-    setFontSize: formatting.setFontSize,
+    toggleFormat,
+    setStyleProperty,
+    setHeading,
+    setColor,
+    setBackgroundColor,
+    setFontSize,
     handleTextChange,
     handleSelectionChange: onSelectionChange,
     isFormatActive: formatting.isFormatActive,
     getSelectionStyle: formatting.currentSelectionStyle,
+    getOutput,
     getPlainText,
     exportJSON,
     importJSON,

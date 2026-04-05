@@ -78,10 +78,23 @@ export function useFormatting({
 
   const setHeading = useCallback(
     (level: HeadingLevel) => {
+      if (selection.start === selection.end) {
+        onActiveStylesChange({
+          ...activeStyles,
+          heading: level === 'none' ? undefined : level,
+        });
+      }
+
       const newSegments = setHeadingOnLine(segments, selection, level);
       onSegmentsChange(newSegments);
     },
-    [segments, selection, onSegmentsChange],
+    [
+      activeStyles,
+      onActiveStylesChange,
+      onSegmentsChange,
+      segments,
+      selection,
+    ],
   );
 
   const setColor = useCallback(
