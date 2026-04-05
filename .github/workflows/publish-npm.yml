@@ -15,24 +15,37 @@ jobs:
   publish:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    environment: Production
+    timeout-minutes: 15
     permissions:
       contents: read
+    container:
+      image: node:20-alpine
+    defaults:
+      run:
+        shell: sh
+    env:
+      HUSKY: 0
+      NPM_CONFIG_AUDIT: false
+      NPM_CONFIG_FUND: false
 
     steps:
       - name: Checkout merged commit
         uses: actions/checkout@v4
         with:
+          fetch-depth: 1
           ref: ${{ github.event.pull_request.merge_commit_sha }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Cache npm
+        uses: actions/cache@v4
         with:
-          node-version: 20
-          registry-url: https://registry.npmjs.org
-          cache: npm
+          path: ~/.npm
+          key: ${{ runner.os }}-node20-alpine-npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node20-alpine-npm-
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline
 
       - name: Type check
         run: npm run lint
@@ -45,7 +58,6 @@ jobs:
 
       - name: Read package metadata
         id: package
-        shell: bash
         run: |
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
@@ -54,7 +66,6 @@ jobs:
 
       - name: Check npm for existing version
         id: npm_check
-        shell: bash
         run: |
           if npm view "${{ steps.package.outputs.name }}@${{ steps.package.outputs.version }}" version >/dev/null 2>&1; then
             echo "published=true" >> "$GITHUB_OUTPUT"
@@ -62,6 +73,14 @@ jobs:
           else
             echo "published=false" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Configure npm auth
+        if: steps.npm_check.outputs.published == 'false'
+        run: |
+          printf "%s\n" "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+          printf "%s\n" "registry=https://registry.npmjs.org/" >> ~/.npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
         if: steps.npm_check.outputs.published == 'false'
