@@ -1,5 +1,5 @@
-import type { StyledSegment, FormatStyle } from '@/types';
-import { EMPTY_FORMAT_STYLE } from '@/constants/defaultStyles';
+import type { StyledSegment, FormatStyle } from '../types';
+import { EMPTY_FORMAT_STYLE } from '../constants/defaultStyles';
 
 /**
  * Creates a new segment with the given text and optional styles.

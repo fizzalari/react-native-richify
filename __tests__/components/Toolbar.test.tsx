@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { Text } from 'react-native';
-import { Toolbar } from '@/components/Toolbar';
-import type { RichTextActions, RichTextState, ToolbarItem } from '@/types';
-import { EMPTY_FORMAT_STYLE } from '@/constants/defaultStyles';
+import { Toolbar } from '../../src/components/Toolbar';
+import type { RichTextActions, RichTextState, ToolbarItem } from '../../src/types';
+import { EMPTY_FORMAT_STYLE } from '../../src/constants/defaultStyles';
 
 const mockActions: RichTextActions = {
   toggleFormat: jest.fn(),

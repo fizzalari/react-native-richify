@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react-native';
-import { useRichText } from '@/hooks/useRichText';
-import { createSegment, segmentsToPlainText } from '@/utils/parser';
-import type { StyledSegment } from '@/types';
+import { useRichText } from '../../src/hooks/useRichText';
+import { createSegment, segmentsToPlainText } from '../../src/utils/parser';
+import type { StyledSegment } from '../../src/types';
 
 describe('useRichText', () => {
   // ─── Initialization ─────────────────────────────────────────────────────

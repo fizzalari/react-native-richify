@@ -2,10 +2,10 @@ import {
   formatStyleToTextStyle,
   segmentToTextStyle,
   segmentsToTextStyles,
-} from '@/utils/styleMapper';
-import { createSegment } from '@/utils/parser';
-import { DEFAULT_THEME } from '@/constants/defaultStyles';
-import type { FormatStyle, RichTextTheme } from '@/types';
+} from '../../src/utils/styleMapper';
+import { createSegment } from '../../src/utils/parser';
+import { DEFAULT_THEME } from '../../src/constants/defaultStyles';
+import type { FormatStyle, RichTextTheme } from '../../src/types';
 
 describe('styleMapper', () => {
   // ─── formatStyleToTextStyle ──────────────────────────────────────────────

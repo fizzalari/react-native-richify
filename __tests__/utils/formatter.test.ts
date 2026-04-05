@@ -4,9 +4,9 @@ import {
   setHeadingOnLine,
   isFormatActiveInSelection,
   getSelectionStyle,
-} from '@/utils/formatter';
-import { createSegment, segmentsToPlainText } from '@/utils/parser';
-import type { StyledSegment, SelectionRange } from '@/types';
+} from '../../src/utils/formatter';
+import { createSegment, segmentsToPlainText } from '../../src/utils/parser';
+import type { StyledSegment, SelectionRange } from '../../src/types';
 
 describe('formatter', () => {
   // ─── toggleFormatOnSelection ─────────────────────────────────────────────

@@ -4,15 +4,15 @@ import type {
   FormatStyle,
   HeadingLevel,
   SelectionRange,
-} from '@/types';
+} from '../types';
 import {
   createSegment,
   findPositionInSegments,
   splitSegment,
   mergeAdjacentSegments,
   segmentsToPlainText,
-} from '@/utils/parser';
-import { HEADING_FONT_SIZES } from '@/constants/defaultStyles';
+} from '../utils/parser';
+import { HEADING_FONT_SIZES } from '../constants/defaultStyles';
 
 /**
  * Toggle an inline format (bold, italic, etc.) on the selected range.
@@ -273,4 +273,4 @@ function getLineRange(
 }
 
 // Re-export for convenience
-export { createSegment } from '@/utils/parser';
+export { createSegment } from '../utils/parser';

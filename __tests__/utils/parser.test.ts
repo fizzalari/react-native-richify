@@ -7,9 +7,9 @@ import {
   areStylesEqual,
   mergeAdjacentSegments,
   reconcileTextChange,
-} from '@/utils/parser';
-import type { StyledSegment, FormatStyle } from '@/types';
-import { EMPTY_FORMAT_STYLE } from '@/constants/defaultStyles';
+} from '../../src/utils/parser';
+import type { StyledSegment, FormatStyle } from '../../src/types';
+import { EMPTY_FORMAT_STYLE } from '../../src/constants/defaultStyles';
 
 describe('parser', () => {
   // ─── createSegment ───────────────────────────────────────────────────────

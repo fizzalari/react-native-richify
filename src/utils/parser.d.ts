@@ -1,4 +1,4 @@
-import type { StyledSegment, FormatStyle } from '@/types';
+import type { StyledSegment, FormatStyle } from '../types';
 /**
  * Creates a new segment with the given text and optional styles.
  */

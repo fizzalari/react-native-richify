@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react-native';
-import { useSelection } from '@/hooks/useSelection';
+import { useSelection } from '../../src/hooks/useSelection';
 
 describe('useSelection', () => {
   it('initializes with default selection (0, 0)', () => {

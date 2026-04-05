@@ -1,8 +1,8 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import { OverlayText } from '@/components/OverlayText';
-import { createSegment } from '@/utils/parser';
-import type { StyledSegment } from '@/types';
+import { OverlayText } from '../../src/components/OverlayText';
+import { createSegment } from '../../src/utils/parser';
+import type { StyledSegment } from '../../src/types';
 
 describe('OverlayText', () => {
   it('renders without crashing', () => {

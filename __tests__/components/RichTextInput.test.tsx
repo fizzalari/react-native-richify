@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { RichTextInput } from '@/components/RichTextInput';
-import { createSegment } from '@/utils/parser';
-import type { StyledSegment } from '@/types';
+import { RichTextInput } from '../../src/components/RichTextInput';
+import { createSegment } from '../../src/utils/parser';
+import type { StyledSegment } from '../../src/types';
 
 describe('RichTextInput', () => {
   it('renders without crashing', () => {

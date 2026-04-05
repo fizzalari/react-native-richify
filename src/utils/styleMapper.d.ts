@@ -1,5 +1,5 @@
 import type { TextStyle } from 'react-native';
-import type { FormatStyle, RichTextTheme, StyledSegment } from '@/types';
+import type { FormatStyle, RichTextTheme, StyledSegment } from '../types';
 /**
  * Maps a FormatStyle to a React Native TextStyle.
  * Applies formatting properties based on the segment's style.

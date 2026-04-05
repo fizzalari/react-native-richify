@@ -1,6 +1,6 @@
 import type { TextStyle } from 'react-native';
-import type { FormatStyle, RichTextTheme, StyledSegment } from '@/types';
-import { DEFAULT_THEME, HEADING_FONT_SIZES } from '@/constants/defaultStyles';
+import type { FormatStyle, RichTextTheme, StyledSegment } from '../types';
+import { DEFAULT_THEME, HEADING_FONT_SIZES } from '../constants/defaultStyles';
 
 /**
  * Maps a FormatStyle to a React Native TextStyle.

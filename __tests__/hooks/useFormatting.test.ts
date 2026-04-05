@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react-native';
-import { useFormatting } from '@/hooks/useFormatting';
-import { createSegment } from '@/utils/parser';
-import type { StyledSegment, FormatStyle, SelectionRange } from '@/types';
-import { EMPTY_FORMAT_STYLE } from '@/constants/defaultStyles';
+import { useFormatting } from '../../src/hooks/useFormatting';
+import { createSegment } from '../../src/utils/parser';
+import type { StyledSegment, FormatStyle, SelectionRange } from '../../src/types';
+import { EMPTY_FORMAT_STYLE } from '../../src/constants/defaultStyles';
 
 function createFormattingHook(overrides: {
   segments?: StyledSegment[];

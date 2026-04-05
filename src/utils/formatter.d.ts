@@ -1,4 +1,4 @@
-import type { StyledSegment, FormatType, FormatStyle, HeadingLevel, SelectionRange } from '@/types';
+import type { StyledSegment, FormatType, FormatStyle, HeadingLevel, SelectionRange } from '../types';
 /**
  * Toggle an inline format (bold, italic, etc.) on the selected range.
  *
@@ -25,4 +25,4 @@ export declare function isFormatActiveInSelection(segments: StyledSegment[], sel
  * For properties where segments disagree, the value is undefined.
  */
 export declare function getSelectionStyle(segments: StyledSegment[], selection: SelectionRange): FormatStyle;
-export { createSegment } from '@/utils/parser';
+export { createSegment } from '../utils/parser';

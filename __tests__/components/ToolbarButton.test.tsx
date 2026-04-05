@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { ToolbarButton } from '@/components/ToolbarButton';
+import { ToolbarButton } from '../../src/components/ToolbarButton';
 import { Text } from 'react-native';
 
 describe('ToolbarButton', () => {
