@@ -112,15 +112,28 @@ export function useFormatting({
 
   const setListType = useCallback(
     (listType: ListType) => {
+      const currentListType =
+        selection.start === selection.end
+          ? getSelectionStyle(segments, selection).listType ??
+            activeStyles.listType
+          : getSelectionStyle(segments, selection).listType;
+      const nextListType: ListType =
+        currentListType === listType ? 'none' : listType;
+
       if (selection.start === selection.end) {
         onActiveStylesChange({
           ...activeStyles,
-          listType: listType === 'none' ? undefined : listType,
-          heading: listType === 'none' ? activeStyles.heading : undefined,
+          listType: nextListType === 'none' ? undefined : nextListType,
+          heading:
+            nextListType === 'none' ? activeStyles.heading : undefined,
         });
       }
 
-      const newSegments = setListTypeOnLine(segments, selection, listType);
+      const newSegments = setListTypeOnLine(
+        segments,
+        selection,
+        nextListType,
+      );
       onSegmentsChange(newSegments);
     },
     [
@@ -134,14 +147,26 @@ export function useFormatting({
 
   const setTextAlign = useCallback(
     (textAlign: TextAlign) => {
+      const currentTextAlign =
+        selection.start === selection.end
+          ? getSelectionStyle(segments, selection).textAlign ??
+            activeStyles.textAlign
+          : getSelectionStyle(segments, selection).textAlign;
+      const nextTextAlign =
+        currentTextAlign === textAlign ? undefined : textAlign;
+
       if (selection.start === selection.end) {
         onActiveStylesChange({
           ...activeStyles,
-          textAlign,
+          textAlign: nextTextAlign,
         });
       }
 
-      const newSegments = setTextAlignOnLine(segments, selection, textAlign);
+      const newSegments = setTextAlignOnLine(
+        segments,
+        selection,
+        nextTextAlign,
+      );
       onSegmentsChange(newSegments);
     },
     [

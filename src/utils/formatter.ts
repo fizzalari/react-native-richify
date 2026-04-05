@@ -95,7 +95,7 @@ export function setListTypeOnLine(
 export function setTextAlignOnLine(
   segments: StyledSegment[],
   selection: SelectionRange,
-  textAlign: TextAlign,
+  textAlign?: TextAlign,
 ): StyledSegment[] {
   return setLineStyleOnSelection(segments, selection, {
     textAlign,

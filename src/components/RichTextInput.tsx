@@ -245,10 +245,6 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
       inputRange: [0, 1],
       outputRange: [0, 12],
     }),
-    marginBottom: previewProgress.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, 16],
-    }),
     transform: [
       {
         translateY: previewProgress.interpolate({
