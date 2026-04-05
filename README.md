@@ -5,6 +5,8 @@ A React Native rich text input with a normal `TextInput` editing surface, a hori
 [![npm version](https://img.shields.io/npm/v/react-native-richify.svg)](https://www.npmjs.com/package/react-native-richify)
 [![license](https://img.shields.io/npm/l/react-native-richify.svg)](https://github.com/soumya-99/react-native-richify/blob/main/LICENSE)
 
+![React Native Richify Demo](demo/richify-demo.gif)
+
 ## Features
 
 - Native editing with no WebView
