@@ -1,6 +1,6 @@
 # react-native-richify
 
-A rich text input for React Native with a normal `TextInput` editing surface, a built-in formatting toolbar, and live Markdown or HTML output.
+A React Native rich text input with a normal `TextInput` editing surface, a horizontally scrollable toolbar, and live Markdown or HTML output below the editor.
 
 [![npm version](https://img.shields.io/npm/v/react-native-richify.svg)](https://www.npmjs.com/package/react-native-richify)
 [![license](https://img.shields.io/npm/l/react-native-richify.svg)](https://github.com/soumya-99/react-native-richify/blob/main/LICENSE)
@@ -8,25 +8,39 @@ A rich text input for React Native with a normal `TextInput` editing surface, a 
 ## Features
 
 - Native editing with no WebView
-- Rich inline formatting: bold, italic, underline, strikethrough, code
-- Line-level formatting: H1, H2, H3, bullet list, ordered list, left/center/right alignment
-- Link support on selected text
-- Live output panel with Markdown or HTML serialization
-- Raw output view or rendered preview view
-- Auto-growing input with configurable input and preview heights
-- Custom toolbar items, custom toolbar rendering, and theme overrides
-- JSON import/export through typed segment data
+- Built-in toolbar uses Lucide React Native icons by default
+- Inline formatting: bold, italic, underline, strikethrough, code
+- Line formatting: H1, H2, H3, bullet list, ordered list, left, center, right
+- Link formatting on selected text
+- Image insertion through the built-in toolbar
+- Output panel can show Markdown or HTML
+- Output panel can show raw serialized text or rendered preview
+- Auto-growing editor with configurable input and preview height limits
+- Custom toolbar items accept text, emoji, or React elements
 - Headless `useRichText` hook for fully custom editors
+- Typed JSON import and export of editor content
 
 ## Installation
 
+Install the package and `react-native-svg`:
+
 ```bash
-npm install react-native-richify
-# or
-yarn add react-native-richify
+npm install react-native-richify react-native-svg
 ```
 
-No native modules are required. The package works in Expo and bare React Native apps.
+or:
+
+```bash
+yarn add react-native-richify react-native-svg
+```
+
+`react-native-svg` is required because the built-in toolbar uses Lucide icons. If you want to use Lucide icons in your own custom toolbar items, install that in your app too:
+
+```bash
+npm install lucide-react-native
+```
+
+The package works in Expo and bare React Native apps. In Expo, `react-native-svg` is usually already available.
 
 ## Quick Start
 
@@ -43,10 +57,11 @@ export default function App() {
         showToolbar
         showOutputPreview
         defaultOutputFormat="markdown"
+        defaultOutputPreviewMode="rendered"
         onChangeText={(text) => console.log('Plain text:', text)}
-        onChangeOutput={(output, format) =>
-          console.log(`Serialized ${format}:`, output)
-        }
+        onChangeOutput={(output, format) => {
+          console.log(format, output);
+        }}
       />
     </View>
   );
@@ -56,137 +71,139 @@ export default function App() {
 This gives you:
 
 - a visible auto-growing `TextInput`
-- a horizontally scrollable toolbar
-- a collapsible output panel that opens when content exists
-- Markdown output by default, with HTML and rendered preview toggles in the toolbar
+- the default Lucide-based toolbar
+- live Markdown output by default
+- a preview panel that opens below the input when content exists
 
-## How Editing Works
+## How The Editor Works
 
-The editor stores content as `StyledSegment[]`, not HTML strings. The plain text you type is always the source of truth for editing, and formatting metadata is applied to matching text ranges or lines.
+The editing surface is always a normal `TextInput`. The library does not render styled text on top of the input.
+
+Internally, content is stored as `StyledSegment[]`. Each segment contains plain text and formatting metadata. That lets the library:
+
+- keep typing behavior predictable
+- apply formatting to selected ranges or future input
+- serialize the same content to Markdown or HTML
+- export and re-import structured JSON safely
 
 Formatting rules:
 
-- If no text is selected, pressing a style button affects the next characters you type.
-- If text is selected, pressing a style button formats the selected range immediately.
-- Headings, lists, and alignment are line-level controls.
-- Every formatting button is toggleable except the output controls: `MD`, `HTML`, `Raw`, and `View`.
+- If nothing is selected, pressing a format button affects the next characters you type.
+- If text is selected, pressing a format button applies or removes that format immediately.
+- Heading, list, and alignment controls work at line level.
+- Every formatting button is toggleable except `MD`, `HTML`, `Raw`, and `View`.
 
 ## Built-in Toolbar
 
-The default toolbar includes these controls:
+The default toolbar is horizontally scrollable and ships with these controls:
 
-| Button | Purpose |
+| Control | Behavior |
 | --- | --- |
-| `B` | Toggle bold |
-| `I` | Toggle italic |
-| `U` | Toggle underline |
-| `S` | Toggle strikethrough |
-| `<>` | Toggle inline code |
-| `H1`, `H2`, `H3` | Toggle heading level on the current line |
-| `•≡` | Toggle bullet list on the current line |
-| `1≡` | Toggle ordered list on the current line |
-| `🔗` | Apply or clear a hyperlink on the current selection |
-| `⇤`, `↔`, `⇥` | Toggle left, center, or right alignment on the current line |
-| `MD`, `HTML` | Switch serialized output format |
-| `Raw`, `View` | Switch between literal serialized output and rendered preview |
+| Bold, Italic, Underline, Strikethrough, Code | Toggle inline formatting |
+| Heading 1, Heading 2, Heading 3 | Toggle heading level on the current line |
+| Bullet List, Ordered List | Toggle list type on the current line |
+| Link | Apply or clear a hyperlink on the selection |
+| Image | Insert an image through your app's image-picking flow |
+| Align Left, Align Center, Align Right | Toggle paragraph alignment |
+| MD, HTML | Switch serialization format |
+| Raw, View | Switch between literal output and rendered preview |
 
 Notes:
 
-- Pressing the active heading again removes that heading.
-- Pressing the active list or alignment button again clears it.
-- The toolbar is horizontally scrollable by default.
-- Image insertion is not part of the built-in toolbar right now.
+- Pressing an active heading button again clears that heading.
+- Pressing an active list or alignment button again clears it.
+- Link clears when the current selection already has a link.
+- Image is a callback-driven action. Your app decides how the URI is chosen.
 
 ## Output Panel
 
-The panel below the input can show either:
+The preview panel below the editor is optional and controlled by `showOutputPreview`.
 
-- literal serialized output (`Raw`)
-- rendered rich output (`View`)
+It supports two output formats:
 
-It can serialize as either:
+- `markdown`
+- `html`
 
-- Markdown
-- HTML
+It also supports two display modes:
+
+- `literal`: show the raw Markdown or HTML text
+- `rendered`: render the rich output visually
 
 Useful props:
 
-| Prop | Description |
+| Prop | Purpose |
 | --- | --- |
-| `showOutputPreview` | Show or hide the output panel entirely |
-| `outputFormat` | Controlled output format |
-| `defaultOutputFormat` | Initial output format for uncontrolled usage |
-| `outputPreviewMode` | Controlled preview mode: `'literal'` or `'rendered'` |
-| `defaultOutputPreviewMode` | Initial preview mode for uncontrolled usage |
-| `maxOutputHeight` | Max height of the output panel before it scrolls |
-| `onChangeOutput` | Called whenever serialized output changes |
-| `onChangeOutputFormat` | Called when toolbar output format changes |
+| `outputFormat` | Controlled Markdown or HTML mode |
+| `defaultOutputFormat` | Initial format for uncontrolled usage |
+| `outputPreviewMode` | Controlled raw or rendered mode |
+| `defaultOutputPreviewMode` | Initial preview mode |
+| `maxOutputHeight` | Max preview height before the panel scrolls |
+| `onChangeOutput` | Receives the serialized output on every change |
+| `onChangeOutputFormat` | Called when toolbar format changes |
 | `onChangeOutputPreviewMode` | Called when toolbar preview mode changes |
-
-Example:
-
-```tsx
-import React, { useState } from 'react';
-import { RichTextInput, type OutputFormat } from 'react-native-richify';
-
-export function ControlledOutputEditor() {
-  const [format, setFormat] = useState<OutputFormat>('html');
-
-  return (
-    <RichTextInput
-      outputFormat={format}
-      onChangeOutputFormat={setFormat}
-      defaultOutputPreviewMode="rendered"
-      maxOutputHeight={220}
-      onChangeOutput={(output) => {
-        console.log(output);
-      }}
-    />
-  );
-}
-```
 
 ## Links
 
 Link formatting is selection-based. Select text, then press the link button.
 
-There are two ways to use it:
+You have two common approaches:
 
-1. Provide `onRequestLink` and show your own prompt, sheet, or modal.
-2. Rely on the built-in fallback, which only auto-links when the selected text already looks like a URL, domain, or email address.
-
-Custom link flow:
+1. Provide `onRequestLink` and open your own prompt, modal, or bottom sheet.
+2. Use the built-in fallback, which auto-links only when the selected text already looks like a URL, domain, or email address.
 
 ```tsx
 <RichTextInput
   onRequestLink={({ selectedText, currentUrl, applyLink }) => {
-    console.log('Selected:', selectedText);
-    console.log('Existing URL:', currentUrl);
-
-    // Replace this with your own modal, bottom sheet, or form.
+    console.log(selectedText, currentUrl);
     applyLink('https://example.com');
   }}
 />
 ```
 
-If the selection already has a link, pressing the link button clears it.
+If the current selection already contains a link, pressing the button clears it.
 
-## Sizing and TextInput Behavior
+## Images
 
-`RichTextInput` uses a normal visible `TextInput`.
+The built-in toolbar includes an image button. It does not open the device picker itself. Instead, it calls `onRequestImage`, and your app decides how to produce the final image URI.
 
-- `minHeight` controls the minimum editor height.
-- `maxHeight` limits the editor height before the input itself scrolls.
-- `maxOutputHeight` limits the output panel height before the preview scrolls.
-- `textInputProps` lets you pass through additional native `TextInput` props.
+```tsx
+<RichTextInput
+  onRequestImage={async ({ insertImage }) => {
+    const result = await pickImageFromYourApp();
+    if (!result?.uri) {
+      return;
+    }
 
-Example:
+    insertImage(result.uri, {
+      alt: result.fileName ?? 'Selected image',
+      placeholder: '[image]',
+    });
+  }}
+/>
+```
+
+Behavior notes:
+
+- The editor inserts a plain text placeholder into the input so typing remains stable.
+- The segment also stores `imageSrc` and optional `imageAlt` metadata.
+- `Raw` mode shows Markdown or HTML image output.
+- `View` mode renders the image in the output panel.
+- If you do not provide `onRequestImage`, the fallback only works when the selected text already looks like an image URL such as `https://site.com/photo.png`.
+
+## Sizing And Input Behavior
+
+`RichTextInput` grows with the text by default.
+
+- `minHeight` sets the minimum input height.
+- `maxHeight` limits the input height before the `TextInput` itself scrolls.
+- `maxOutputHeight` limits the preview panel height before it scrolls.
+- `textInputProps` passes additional native `TextInput` props through to the editor.
 
 ```tsx
 <RichTextInput
   minHeight={140}
   maxHeight={280}
-  maxOutputHeight={200}
+  maxOutputHeight={220}
   textInputProps={{
     autoCapitalize: 'sentences',
     keyboardType: 'default',
@@ -194,58 +211,55 @@ Example:
 />
 ```
 
-## API Overview
+## Customizing The Toolbar
 
-### `<RichTextInput />`
+Use `toolbarItems` when you want to keep the built-in toolbar behavior but replace some or all buttons.
 
-Most common props:
+`ToolbarItem.label` accepts any React node, so you can use:
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `initialSegments` | `StyledSegment[]` | empty content | Initial document value |
-| `onChangeSegments` | `(segments) => void` | - | Called with the rich document model |
-| `onChangeText` | `(text) => void` | - | Called with plain text |
-| `placeholder` | `string` | `"Start typing..."` | Placeholder text |
-| `showToolbar` | `boolean` | `true` | Show the built-in toolbar |
-| `toolbarPosition` | `'top' \| 'bottom'` | `'top'` | Place toolbar above or below the editor |
-| `toolbarItems` | `ToolbarItem[]` | default items | Replace the built-in toolbar item list |
-| `theme` | `RichTextTheme` | default theme | Visual overrides |
-| `showOutputPreview` | `boolean` | `true` | Enable the output panel |
-| `multiline` | `boolean` | `true` | Standard `TextInput` multiline editing |
-| `minHeight` | `number` | `120` | Minimum editor height |
-| `maxHeight` | `number` | - | Maximum editor height before scrolling |
-| `autoFocus` | `boolean` | `false` | Focus input on mount |
-| `textInputProps` | `TextInputProps` subset | - | Additional native input props |
-| `renderToolbar` | `(props) => ReactElement` | - | Render a completely custom toolbar |
-| `onReady` | `(actions) => void` | - | Access editor actions outside the toolbar |
+- plain text such as `'B'`
+- emoji content
+- a Lucide icon such as `<Bold />`
+- any custom React element
 
-### Actions from `onReady` or `useRichText`
+When the label is not plain text, set `accessibilityLabel` so screen readers and tests can identify the button correctly.
 
-| Action | Description |
-| --- | --- |
-| `toggleFormat(format)` | Toggle `bold`, `italic`, `underline`, `strikethrough`, or `code` |
-| `setHeading(level)` | Toggle `h1`, `h2`, `h3`, or clear with `none` |
-| `setListType(type)` | Toggle `bullet`, `ordered`, or clear with `none` |
-| `setTextAlign(align)` | Toggle `left`, `center`, or `right` alignment |
-| `setLink(url?)` | Apply or clear hyperlink formatting |
-| `setColor(color)` | Set text color |
-| `setBackgroundColor(color)` | Set highlight color |
-| `setFontSize(size)` | Set font size |
-| `handleTextChange(text)` | Sync plain text input changes |
-| `handleSelectionChange(selection)` | Sync `TextInput` selection changes |
-| `isFormatActive(format)` | Check active state for inline formats |
-| `getSelectionStyle()` | Read the common style for the current selection |
-| `getOutput(format?)` | Serialize current content as Markdown or HTML |
-| `getPlainText()` | Get plain text only |
-| `exportJSON()` | Export the current segment array |
-| `importJSON(segments)` | Replace content from a saved segment array |
-| `clear()` | Reset the editor |
+Example:
 
-## Custom Toolbar
+```tsx
+import React from 'react';
+import { Bold, ImagePlus, List } from 'lucide-react-native';
+import { RichTextInput } from 'react-native-richify';
 
-Use `toolbarItems` when you only want to replace the built-in buttons, or `renderToolbar` when you want full control.
-
-### `toolbarItems`
+<RichTextInput
+  toolbarItems={[
+    {
+      id: 'bold',
+      label: <Bold />,
+      accessibilityLabel: 'Bold',
+      format: 'bold',
+    },
+    {
+      id: 'note',
+      label: 'Note',
+      onPress: () => console.log('Custom action'),
+    },
+    {
+      id: 'bullet',
+      label: <List />,
+      accessibilityLabel: 'Bullet list',
+      listType: 'bullet',
+    },
+    {
+      id: 'image',
+      label: <ImagePlus />,
+      accessibilityLabel: 'Insert image',
+      actionType: 'image',
+    },
+    { id: 'html', label: 'HTML', outputFormat: 'html' },
+  ]}
+/>
+```
 
 Supported built-in item fields:
 
@@ -255,28 +269,11 @@ Supported built-in item fields:
 - `textAlign`
 - `outputFormat`
 - `outputPreviewMode`
-- `actionType: 'link'`
+- `actionType: 'link' | 'image'`
 - `onPress`
 - `renderButton`
 
-Example:
-
-```tsx
-<RichTextInput
-  toolbarItems={[
-    { id: 'bold', label: 'B', format: 'bold' },
-    { id: 'h1', label: 'H1', heading: 'h1' },
-    { id: 'bullet', label: '•≡', listType: 'bullet' },
-    { id: 'center', label: '↔', textAlign: 'center' },
-    { id: 'html', label: 'HTML', outputFormat: 'html' },
-    { id: 'link', label: '🔗', actionType: 'link' },
-  ]}
-/>
-```
-
-### `renderToolbar`
-
-Use `renderToolbar` if you need a custom layout or your own button components.
+If you need a completely custom layout, use `renderToolbar`:
 
 ```tsx
 <RichTextInput
@@ -286,10 +283,12 @@ Use `renderToolbar` if you need a custom layout or your own button components.
     outputPreviewMode,
     onOutputFormatChange,
     onOutputPreviewModeChange,
+    onRequestImage,
   }) => (
     <>
       <MyButton onPress={() => actions.toggleFormat('bold')} label="Bold" />
       <MyButton onPress={() => actions.setHeading('h2')} label="Heading" />
+      <MyButton onPress={onRequestImage} label="Image" />
       <MyButton
         onPress={() => onOutputFormatChange('html')}
         label={outputFormat === 'html' ? 'HTML on' : 'HTML'}
@@ -305,7 +304,7 @@ Use `renderToolbar` if you need a custom layout or your own button components.
 
 ## Theming
 
-The theme object lets you style the editor container, input, toolbar, output panel, and button states.
+Use the `theme` prop to override container, toolbar, input, and output styles.
 
 ```tsx
 <RichTextInput
@@ -326,48 +325,42 @@ The theme object lets you style the editor container, input, toolbar, output pan
       borderColor: '#CBD5E1',
     },
     outputContainerStyle: {
-      marginHorizontal: 12,
-      marginBottom: 12,
+      margin: 12,
       padding: 12,
       borderRadius: 12,
       backgroundColor: '#F8FAFC',
-    },
-    toolbarButtonActiveStyle: {
-      backgroundColor: '#CCFBF1',
     },
   }}
 />
 ```
 
-Useful theme keys:
+Common theme keys:
 
 - `containerStyle`
 - `inputStyle`
 - `baseTextStyle`
-- `outputContainerStyle`
-- `outputLabelStyle`
-- `outputTextStyle`
-- `renderedOutputStyle`
 - `toolbarStyle`
 - `toolbarButtonStyle`
 - `toolbarButtonActiveStyle`
 - `toolbarButtonTextStyle`
 - `toolbarButtonActiveTextStyle`
+- `outputContainerStyle`
+- `outputLabelStyle`
+- `outputTextStyle`
+- `renderedOutputStyle`
 - `codeStyle`
-- `colors.primary`
-- `colors.link`
 
-## Headless Hook
+## Headless Usage
 
-Use `useRichText` when you want to build your own editor UI.
+Use `useRichText` when you want to build your own editor shell instead of using `<RichTextInput />`.
 
 ```tsx
 import React from 'react';
-import { TextInput, View, Button } from 'react-native';
+import { Button, TextInput, View } from 'react-native';
 import { useRichText } from 'react-native-richify';
 
 export function HeadlessEditor() {
-  const { state, actions } = useRichText({
+  const { actions } = useRichText({
     onChangeText: (text) => console.log(text),
   });
 
@@ -389,58 +382,9 @@ export function HeadlessEditor() {
 }
 ```
 
-## Context API
+## Data Model And Serialization
 
-`RichTextProvider` and `useRichTextContext()` are for custom UIs built on the hook.
-
-Important: the shipped `<RichTextInput />` manages its own state. Wrapping it in `RichTextProvider` does not automatically bind it to external context state.
-
-Use context when you want to split a custom editor into multiple components:
-
-```tsx
-import React from 'react';
-import { Button, TextInput, View } from 'react-native';
-import {
-  RichTextProvider,
-  useRichTextContext,
-} from 'react-native-richify';
-
-function ToolbarRow() {
-  const { actions } = useRichTextContext();
-  return <Button title="Italic" onPress={() => actions.toggleFormat('italic')} />;
-}
-
-function EditorField() {
-  const { actions } = useRichTextContext();
-
-  return (
-    <TextInput
-      multiline
-      value={actions.getPlainText()}
-      onChangeText={actions.handleTextChange}
-      onSelectionChange={(event) =>
-        actions.handleSelectionChange(event.nativeEvent.selection)
-      }
-      style={{ minHeight: 120, borderWidth: 1, padding: 12 }}
-    />
-  );
-}
-
-export function SplitEditor() {
-  return (
-    <RichTextProvider>
-      <View>
-        <ToolbarRow />
-        <EditorField />
-      </View>
-    </RichTextProvider>
-  );
-}
-```
-
-## Data Model
-
-Content is stored as segments:
+The editor stores content as typed segments:
 
 ```ts
 type StyledSegment = {
@@ -458,36 +402,23 @@ type StyledSegment = {
     listType?: 'bullet' | 'ordered' | 'none';
     textAlign?: 'left' | 'center' | 'right';
     link?: string;
+    imageSrc?: string;
+    imageAlt?: string;
   };
 };
 ```
 
-This makes it easy to:
+That makes it straightforward to:
 
-- store and restore content with `exportJSON()` and `importJSON()`
-- inspect formatting state in your own UI
-- serialize on demand to Markdown or HTML
-
-Example:
-
-```tsx
-const saved = actions.exportJSON();
-actions.importJSON(saved);
-
-const markdown = actions.getOutput('markdown');
-const html = actions.getOutput('html');
-```
-
-## Current Scope
-
-Stable built-in features documented above are the recommended way to use the library.
-
-- Rich text formatting, headings, lists, links, alignment, theming, and output serialization are supported.
-- The built-in toolbar does not currently expose image insertion.
+- save content with `exportJSON()`
+- restore content with `importJSON()`
+- read plain text with `getPlainText()`
+- generate Markdown with `getOutput('markdown')`
+- generate HTML with `getOutput('html')`
 
 ## Contributing
 
-See [AGENTS.md](AGENTS.md) for contributor notes and repository workflow guidance.
+See [AGENTS.md](AGENTS.md) for contributor workflow notes.
 
 ## License
 

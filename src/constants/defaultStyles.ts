@@ -1,3 +1,21 @@
+import React from 'react';
+import {
+  Bold,
+  Code,
+  Heading1,
+  Heading2,
+  Heading3,
+  ImagePlus,
+  Italic,
+  Link2,
+  List,
+  ListOrdered,
+  Strikethrough,
+  TextAlignCenter,
+  TextAlignEnd,
+  TextAlignStart,
+  Underline,
+} from 'lucide-react-native';
 import type { RichTextTheme, FormatStyle, ToolbarItem } from '../types';
 
 /**
@@ -168,22 +186,33 @@ export const DEFAULT_THEME: RichTextTheme = {
  * Default toolbar items for the built-in toolbar.
  */
 export const DEFAULT_TOOLBAR_ITEMS: ToolbarItem[] = [
-  { id: 'bold', label: 'B', format: 'bold' },
-  { id: 'italic', label: 'I', format: 'italic' },
-  { id: 'underline', label: 'U', format: 'underline' },
-  { id: 'strikethrough', label: 'S', format: 'strikethrough' },
-  { id: 'code', label: '<>', format: 'code' },
-  { id: 'h1', label: 'H1', heading: 'h1' },
-  { id: 'h2', label: 'H2', heading: 'h2' },
-  { id: 'h3', label: 'H3', heading: 'h3' },
-  { id: 'bullet', label: '\u2022\u2261', listType: 'bullet' },
-  { id: 'ordered', label: '1\u2261', listType: 'ordered' },
-  { id: 'link', label: '\ud83d\udd17', actionType: 'link' },
-  { id: 'align-left', label: '\u21e4', textAlign: 'left' },
-  { id: 'align-center', label: '\u2194', textAlign: 'center' },
-  { id: 'align-right', label: '\u21e5', textAlign: 'right' },
-  { id: 'format-markdown', label: 'MD', outputFormat: 'markdown' },
-  { id: 'format-html', label: 'HTML', outputFormat: 'html' },
-  { id: 'preview-literal', label: 'Raw', outputPreviewMode: 'literal' },
-  { id: 'preview-rendered', label: 'View', outputPreviewMode: 'rendered' },
+  { id: 'bold', label: createToolbarIcon(Bold), format: 'bold', accessibilityLabel: 'Bold' },
+  { id: 'italic', label: createToolbarIcon(Italic), format: 'italic', accessibilityLabel: 'Italic' },
+  { id: 'underline', label: createToolbarIcon(Underline), format: 'underline', accessibilityLabel: 'Underline' },
+  { id: 'strikethrough', label: createToolbarIcon(Strikethrough), format: 'strikethrough', accessibilityLabel: 'Strikethrough' },
+  { id: 'code', label: createToolbarIcon(Code), format: 'code', accessibilityLabel: 'Code' },
+  { id: 'h1', label: createToolbarIcon(Heading1), heading: 'h1', accessibilityLabel: 'Heading 1' },
+  { id: 'h2', label: createToolbarIcon(Heading2), heading: 'h2', accessibilityLabel: 'Heading 2' },
+  { id: 'h3', label: createToolbarIcon(Heading3), heading: 'h3', accessibilityLabel: 'Heading 3' },
+  { id: 'bullet', label: createToolbarIcon(List), listType: 'bullet', accessibilityLabel: 'Bullet list' },
+  { id: 'ordered', label: createToolbarIcon(ListOrdered), listType: 'ordered', accessibilityLabel: 'Ordered list' },
+  { id: 'link', label: createToolbarIcon(Link2), actionType: 'link', accessibilityLabel: 'Link' },
+  { id: 'image', label: createToolbarIcon(ImagePlus), actionType: 'image', accessibilityLabel: 'Insert image' },
+  { id: 'align-left', label: createToolbarIcon(TextAlignStart), textAlign: 'left', accessibilityLabel: 'Align left' },
+  { id: 'align-center', label: createToolbarIcon(TextAlignCenter), textAlign: 'center', accessibilityLabel: 'Align center' },
+  { id: 'align-right', label: createToolbarIcon(TextAlignEnd), textAlign: 'right', accessibilityLabel: 'Align right' },
+  { id: 'format-markdown', label: 'MD', outputFormat: 'markdown', accessibilityLabel: 'Markdown output' },
+  { id: 'format-html', label: 'HTML', outputFormat: 'html', accessibilityLabel: 'HTML output' },
+  { id: 'preview-literal', label: 'Raw', outputPreviewMode: 'literal', accessibilityLabel: 'Raw output view' },
+  { id: 'preview-rendered', label: 'View', outputPreviewMode: 'rendered', accessibilityLabel: 'Rendered preview' },
 ];
+
+function createToolbarIcon(
+  Icon: React.ComponentType<{
+    color?: string;
+    size?: number;
+    strokeWidth?: number;
+  }>,
+) {
+  return React.createElement(Icon);
+}

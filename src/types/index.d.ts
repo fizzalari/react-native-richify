@@ -1,3 +1,4 @@
+import type { ReactElement, ReactNode } from 'react';
 import type { TextStyle, ViewStyle, TextInputProps, ColorValue } from 'react-native';
 /**
  * Supported inline formatting types.
@@ -183,8 +184,10 @@ export interface RichTextTheme {
 export interface ToolbarItem {
     /** Unique identifier. */
     id: string;
-    /** Display label or icon text. */
-    label: string;
+    /** Display content for the button: text, emoji, or a React element. */
+    label: ReactNode;
+    /** Accessibility label used when the button content is not plain text. */
+    accessibilityLabel?: string;
     /** The format type this button toggles (for inline formats). */
     format?: FormatType;
     /** The heading level this button sets. */
@@ -204,7 +207,7 @@ export interface ToolbarItem {
     /** Whether this item is currently active. */
     active?: boolean;
     /** Custom render function for the button. */
-    renderButton?: (props: ToolbarButtonRenderProps) => React.ReactElement | null;
+    renderButton?: (props: ToolbarButtonRenderProps) => ReactElement | null;
 }
 /**
  * Props passed to a custom toolbar button renderer.
@@ -212,7 +215,8 @@ export interface ToolbarItem {
 export interface ToolbarButtonRenderProps {
     active: boolean;
     onPress: () => void;
-    label: string;
+    label: ReactNode;
+    accessibilityLabel?: string;
 }
 /**
  * Props passed to a custom toolbar renderer.
@@ -264,8 +268,10 @@ export interface OverlayTextProps {
  * Props for the ToolbarButton component.
  */
 export interface ToolbarButtonProps {
-    /** Button label text. */
-    label: string;
+    /** Button label or icon content. */
+    label: ReactNode;
+    /** Accessibility label used for assistive technologies. */
+    accessibilityLabel?: string;
     /** Whether the button is currently active. */
     active: boolean;
     /** Press handler. */
@@ -302,7 +308,7 @@ export interface ToolbarProps {
     /** Called when the image button is pressed. */
     onRequestImage?: () => void;
     /** Custom render function for the entire toolbar. */
-    renderToolbar?: (props: ToolbarRenderProps) => React.ReactElement | null;
+    renderToolbar?: (props: ToolbarRenderProps) => ReactElement | null;
 }
 /**
  * Props for the main RichTextInput component.

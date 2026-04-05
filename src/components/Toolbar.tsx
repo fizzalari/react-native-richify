@@ -109,6 +109,7 @@ export const Toolbar: React.FC<ToolbarProps> = React.memo(
             <ToolbarButton
               key={item.id}
               label={item.label}
+              accessibilityLabel={item.accessibilityLabel}
               active={!!item.active}
               theme={resolvedTheme}
               renderButton={item.renderButton}
