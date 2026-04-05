@@ -1,4 +1,5 @@
 ---
+trigger: always_on
 description: Global Standards and Security Rules
 ---
 
@@ -11,7 +12,7 @@ description: Global Standards and Security Rules
 - **Testing**: Jest paired with React Native Testing Library.
 
 ## Coding Style & Structure
-- **Path Aliases**: Always use `@/*` to map to `src/*` for imports instead of relative paths (`../` or `./`).
+- **Path Aliases**: Always use relative paths (`../` or `./`).
 - **Component Design**: Functional components + React hooks strictly. No class-based components.
 - **Pure RN**: Do not use WebView based editors. Use React Native constructs seamlessly to limit XSS and vulnerability vectors natively.
 

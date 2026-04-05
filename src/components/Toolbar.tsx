@@ -20,17 +20,17 @@ export const Toolbar: React.FC<ToolbarProps> = React.memo(
 
     // Compute active state for each item
     const enrichedItems: ToolbarItem[] = useMemo(() => {
+      const selectionStyle = actions.getSelectionStyle();
+
       return toolbarItems.map((item) => {
         let isActive = false;
 
         if (item.format) {
-          // Check if the format is currently active
-          const { activeStyles } = state;
-          isActive = !!activeStyles[item.format];
+          isActive = actions.isFormatActive(item.format);
         }
 
         if (item.heading) {
-          isActive = state.activeStyles.heading === item.heading;
+          isActive = selectionStyle.heading === item.heading;
         }
 
         return {
@@ -38,7 +38,7 @@ export const Toolbar: React.FC<ToolbarProps> = React.memo(
           active: item.active ?? isActive,
         };
       });
-    }, [toolbarItems, state]);
+    }, [actions, toolbarItems]);
 
     // Custom render
     if (renderToolbar) {

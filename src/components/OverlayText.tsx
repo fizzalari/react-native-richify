@@ -17,21 +17,29 @@ export const OverlayText: React.FC<OverlayTextProps> = React.memo(
     const overlayStyle =
       resolvedTheme.overlayContainerStyle ??
       DEFAULT_THEME.overlayContainerStyle;
+    const resolvedBaseTextStyle =
+      baseTextStyle ??
+      resolvedTheme.baseTextStyle ??
+      DEFAULT_THEME.baseTextStyle;
+    const overlayTheme = {
+      ...resolvedTheme,
+      baseTextStyle: resolvedBaseTextStyle,
+    };
 
     return (
       <View style={overlayStyle} pointerEvents="none">
-        <Text>
+        <Text style={resolvedBaseTextStyle}>
           {segments.map((segment, index) => {
             if (segment.text.length === 0 && segments.length > 1) {
               return null;
             }
 
-            const textStyle = segmentToTextStyle(segment, resolvedTheme);
+            const textStyle = segmentToTextStyle(segment, overlayTheme);
 
             return (
               <Text
                 key={`${index}-${segment.text.slice(0, 8)}`}
-                style={[baseTextStyle, textStyle]}
+                style={textStyle}
               >
                 {segment.text}
               </Text>

@@ -1,9 +1,7 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type {
   StyledSegment,
-  FormatType,
   FormatStyle,
-  HeadingLevel,
   SelectionRange,
   RichTextState,
   RichTextActions,
@@ -16,6 +14,7 @@ import {
   reconcileTextChange,
   findPositionInSegments,
 } from '../utils/parser';
+import { getSelectionStyle } from '../utils/formatter';
 import { useSelection } from '../hooks/useSelection';
 import { useFormatting } from '../hooks/useFormatting';
 
@@ -57,6 +56,8 @@ export function useRichText(
   // Refs for stable access in callbacks
   const segmentsRef = useRef(segments);
   segmentsRef.current = segments;
+  const selectionRef = useRef(selection);
+  selectionRef.current = selection;
   const activeStylesRef = useRef(activeStyles);
   activeStylesRef.current = activeStyles;
 
@@ -86,7 +87,11 @@ export function useRichText(
   const handleTextChange = useCallback(
     (newText: string) => {
       const currentSegments = segmentsRef.current;
-      const currentActiveStyles = activeStylesRef.current;
+      const currentSelection = selectionRef.current;
+      const currentActiveStyles =
+        currentSelection.start === currentSelection.end
+          ? activeStylesRef.current
+          : getSelectionStyle(currentSegments, currentSelection);
 
       const newSegments = reconcileTextChange(
         currentSegments,
@@ -161,6 +166,8 @@ export function useRichText(
     setFontSize: formatting.setFontSize,
     handleTextChange,
     handleSelectionChange: onSelectionChange,
+    isFormatActive: formatting.isFormatActive,
+    getSelectionStyle: formatting.currentSelectionStyle,
     getPlainText,
     exportJSON,
     importJSON,

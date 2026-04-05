@@ -12,4 +12,4 @@ export { createSegment, segmentsToPlainText, getTotalLength, mergeAdjacentSegmen
 export { toggleFormatOnSelection, setStyleOnSelection, setHeadingOnLine, isFormatActiveInSelection, getSelectionStyle, } from './utils/formatter';
 export { formatStyleToTextStyle, segmentToTextStyle, segmentsToTextStyles, } from './utils/styleMapper';
 export { DEFAULT_COLORS, DEFAULT_THEME, DEFAULT_TOOLBAR_ITEMS, DEFAULT_BASE_TEXT_STYLE, HEADING_FONT_SIZES, EMPTY_FORMAT_STYLE, } from './constants/defaultStyles';
-export type { FormatType, HeadingLevel, ListType, FormatStyle, StyledSegment, SelectionRange, RichTextState, RichTextActions, UseRichTextReturn, RichTextTheme, ToolbarItem, OverlayTextProps, ToolbarButtonProps, ToolbarProps, RichTextInputProps, } from './types';
+export type { FormatType, HeadingLevel, ListType, FormatStyle, StyledSegment, SelectionRange, RichTextState, RichTextActions, UseRichTextReturn, RichTextTheme, ToolbarItem, ToolbarButtonRenderProps, ToolbarRenderProps, OverlayTextProps, ToolbarButtonProps, ToolbarProps, RichTextInputProps, } from './types';
