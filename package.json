@@ -1,6 +1,6 @@
 {
   "name": "react-native-richify",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A customizable React Native rich text input with a native toolbar and Markdown or HTML output.",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
