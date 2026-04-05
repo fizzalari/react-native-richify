@@ -322,6 +322,21 @@ describe('useRichText', () => {
 
       expect(result.current.actions.getOutput('markdown')).toBe('- First item');
     });
+
+    it('toggles a list style off when the same button is pressed again', () => {
+      const { result } = renderHook(() =>
+        useRichText({
+          initialSegments: [createSegment('First item', { listType: 'bullet' })],
+        }),
+      );
+
+      act(() => {
+        result.current.actions.handleSelectionChange({ start: 0, end: 0 });
+        result.current.actions.setListType('bullet');
+      });
+
+      expect(result.current.state.segments[0].styles.listType).toBeUndefined();
+    });
   });
 
   describe('setTextAlign', () => {
@@ -339,6 +354,21 @@ describe('useRichText', () => {
       expect(result.current.actions.getOutput('markdown')).toBe(
         '<p style="text-align: center">Centered copy</p>',
       );
+    });
+
+    it('toggles alignment off when the same button is pressed again', () => {
+      const { result } = renderHook(() =>
+        useRichText({
+          initialSegments: [createSegment('Centered copy', { textAlign: 'center' })],
+        }),
+      );
+
+      act(() => {
+        result.current.actions.handleSelectionChange({ start: 0, end: 0 });
+        result.current.actions.setTextAlign('center');
+      });
+
+      expect(result.current.state.segments[0].styles.textAlign).toBeUndefined();
     });
   });
 

@@ -58,6 +58,18 @@ describe('Toolbar', () => {
     expect(getByText('S')).toBeTruthy();
     expect(getByText('<>')).toBeTruthy();
     expect(getByText('H1')).toBeTruthy();
+    expect(getByText('🔗')).toBeTruthy();
+    expect(getByText('⇤')).toBeTruthy();
+    expect(getByText('↔')).toBeTruthy();
+    expect(getByText('⇥')).toBeTruthy();
+  });
+
+  it('does not render the image button in the default toolbar', () => {
+    const { queryByText } = render(
+      <Toolbar actions={mockActions} state={mockState} />,
+    );
+
+    expect(queryByText('Img')).toBeNull();
   });
 
   it('calls toggleFormat when format button is pressed', () => {

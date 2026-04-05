@@ -179,6 +179,20 @@ describe('useFormatting', () => {
         expect.objectContaining({ listType: 'ordered', heading: undefined }),
       );
     });
+
+    it('toggles the same list style off', () => {
+      const { hook, onActiveStylesChange } = createFormattingHook({
+        activeStyles: { ...EMPTY_FORMAT_STYLE, listType: 'bullet' },
+      });
+
+      act(() => {
+        hook.result.current.setListType('bullet');
+      });
+
+      expect(onActiveStylesChange).toHaveBeenCalledWith(
+        expect.objectContaining({ listType: undefined }),
+      );
+    });
   });
 
   describe('setTextAlign', () => {
@@ -191,6 +205,20 @@ describe('useFormatting', () => {
 
       expect(onActiveStylesChange).toHaveBeenCalledWith(
         expect.objectContaining({ textAlign: 'right' }),
+      );
+    });
+
+    it('toggles the same alignment off', () => {
+      const { hook, onActiveStylesChange } = createFormattingHook({
+        activeStyles: { ...EMPTY_FORMAT_STYLE, textAlign: 'center' },
+      });
+
+      act(() => {
+        hook.result.current.setTextAlign('center');
+      });
+
+      expect(onActiveStylesChange).toHaveBeenCalledWith(
+        expect.objectContaining({ textAlign: undefined }),
       );
     });
   });
