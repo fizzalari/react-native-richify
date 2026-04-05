@@ -1,4 +1,4 @@
-import type { RichTextTheme, FormatStyle, ToolbarItem } from '@/types';
+import type { RichTextTheme, FormatStyle, ToolbarItem } from '../types';
 /**
  * Default color palette used throughout the editor.
  */

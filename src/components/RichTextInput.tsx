@@ -89,7 +89,10 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
   // Input style
   const inputStyle = [
     styles.textInput,
+    resolvedTheme.baseTextStyle ?? DEFAULT_THEME.baseTextStyle,
     resolvedTheme.inputStyle ?? DEFAULT_THEME.inputStyle,
+    textInputProps?.style,
+    styles.hiddenInputText,
   ];
 
   // Toolbar component
@@ -141,11 +144,12 @@ export const RichTextInput: React.FC<RichTextInputProps> = ({
           editable={editable}
           maxLength={maxLength}
           autoFocus={autoFocus}
+          underlineColorAndroid="transparent"
           selectionColor={
             resolvedTheme.colors?.cursor ?? DEFAULT_THEME.colors?.cursor
           }
           textAlignVertical="top"
-          scrollEnabled={true}
+          scrollEnabled={typeof maxHeight === 'number'}
         />
       </View>
 
@@ -164,11 +168,13 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   textInput: {
-    // The TextInput must be transparent so the overlay text shows through.
-    // Only the caret/cursor and selection highlight are visible.
-    color: 'transparent',
-    // Ensure it matches the overlay text positioning exactly.
     position: 'relative',
     zIndex: 1,
+  },
+  hiddenInputText: {
+    // Keep the editable layer invisible while preserving the caret.
+    color: 'transparent',
+    backgroundColor: 'transparent',
+    textShadowColor: 'transparent',
   },
 });

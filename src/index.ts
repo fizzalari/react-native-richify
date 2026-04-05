@@ -61,6 +61,8 @@ export type {
   UseRichTextReturn,
   RichTextTheme,
   ToolbarItem,
+  ToolbarButtonRenderProps,
+  ToolbarRenderProps,
   OverlayTextProps,
   ToolbarButtonProps,
   ToolbarProps,

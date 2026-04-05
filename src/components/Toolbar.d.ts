@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ToolbarProps } from '@/types';
+import type { ToolbarProps } from '../types';
 /**
  * Formatting toolbar for the rich text editor.
  *

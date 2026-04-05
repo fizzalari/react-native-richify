@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
 import { Toolbar } from '../../src/components/Toolbar';
 import type { RichTextActions, RichTextState, ToolbarItem } from '../../src/types';
 import { EMPTY_FORMAT_STYLE } from '../../src/constants/defaultStyles';
@@ -14,6 +14,8 @@ const mockActions: RichTextActions = {
   setFontSize: jest.fn(),
   handleTextChange: jest.fn(),
   handleSelectionChange: jest.fn(),
+  isFormatActive: jest.fn(() => false),
+  getSelectionStyle: jest.fn(() => ({ ...EMPTY_FORMAT_STYLE })),
   getPlainText: jest.fn(() => ''),
   exportJSON: jest.fn(() => []),
   importJSON: jest.fn(),
@@ -29,6 +31,8 @@ const mockState: RichTextState = {
 describe('Toolbar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockActions.isFormatActive = jest.fn(() => false);
+    mockActions.getSelectionStyle = jest.fn(() => ({ ...EMPTY_FORMAT_STYLE }));
   });
 
   it('renders without crashing', () => {
@@ -135,15 +139,32 @@ describe('Toolbar', () => {
   });
 
   it('shows active state for enabled formats', () => {
-    const activeState: RichTextState = {
-      ...mockState,
-      activeStyles: { bold: true, italic: true },
-    };
+    mockActions.isFormatActive = jest.fn(
+      (format) => format === 'bold' || format === 'italic',
+    );
+    mockActions.getSelectionStyle = jest.fn(() => ({ heading: 'h1' }));
 
     const { toJSON } = render(
-      <Toolbar actions={mockActions} state={activeState} />,
+      <Toolbar actions={mockActions} state={mockState} />,
     );
     // The toolbar should render with active buttons
     expect(toJSON()).toBeTruthy();
+  });
+
+  it('derives active state from selection-aware editor actions', () => {
+    mockActions.isFormatActive = jest.fn((format) => format === 'bold');
+    mockActions.getSelectionStyle = jest.fn(() => ({ heading: 'h2' }));
+
+    const { UNSAFE_getAllByType } = render(
+      <Toolbar actions={mockActions} state={mockState} />,
+    );
+
+    const selectedButtons = UNSAFE_getAllByType(TouchableOpacity).filter(
+      (button) => button.props.accessibilityState?.selected,
+    );
+
+    expect(mockActions.isFormatActive).toHaveBeenCalledWith('bold');
+    expect(mockActions.getSelectionStyle).toHaveBeenCalled();
+    expect(selectedButtons).toHaveLength(2);
   });
 });

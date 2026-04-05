@@ -101,6 +101,10 @@ export interface RichTextActions {
   handleTextChange: (text: string) => void;
   /** Handle selection change from TextInput. */
   handleSelectionChange: (selection: SelectionRange) => void;
+  /** Check whether a format is active at the current cursor/selection. */
+  isFormatActive: (format: FormatType) => boolean;
+  /** Get the effective shared style at the current cursor/selection. */
+  getSelectionStyle: () => FormatStyle;
   /** Get the full plain text content. */
   getPlainText: () => string;
   /** Export the segments as a serializable JSON array. */
@@ -185,11 +189,25 @@ export interface ToolbarItem {
   /** Whether this item is currently active. */
   active?: boolean;
   /** Custom render function for the button. */
-  renderButton?: (props: {
-    active: boolean;
-    onPress: () => void;
-    label: string;
-  }) => React.ReactElement;
+  renderButton?: (props: ToolbarButtonRenderProps) => React.ReactElement | null;
+}
+
+/**
+ * Props passed to a custom toolbar button renderer.
+ */
+export interface ToolbarButtonRenderProps {
+  active: boolean;
+  onPress: () => void;
+  label: string;
+}
+
+/**
+ * Props passed to a custom toolbar renderer.
+ */
+export interface ToolbarRenderProps {
+  items: ToolbarItem[];
+  state: RichTextState;
+  actions: RichTextActions;
 }
 
 // ─── Component Props ─────────────────────────────────────────────────────────
@@ -237,11 +255,7 @@ export interface ToolbarProps {
   /** Whether to show the toolbar. */
   visible?: boolean;
   /** Custom render function for the entire toolbar. */
-  renderToolbar?: (props: {
-    items: ToolbarItem[];
-    state: RichTextState;
-    actions: RichTextActions;
-  }) => React.ReactElement;
+  renderToolbar?: (props: ToolbarRenderProps) => React.ReactElement | null;
 }
 
 /**

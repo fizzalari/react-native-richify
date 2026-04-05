@@ -63,6 +63,28 @@ describe('useRichText', () => {
 
       expect(onChangeSegments).toHaveBeenCalled();
     });
+
+    it('inherits selection styles when replacing selected text', () => {
+      const { result } = renderHook(() =>
+        useRichText({
+          initialSegments: [
+            createSegment('Bold', { bold: true }),
+            createSegment(' plain'),
+          ],
+        }),
+      );
+
+      act(() => {
+        result.current.actions.handleSelectionChange({ start: 0, end: 4 });
+      });
+
+      act(() => {
+        result.current.actions.handleTextChange('X plain');
+      });
+
+      expect(result.current.state.segments[0].text).toBe('X');
+      expect(result.current.state.segments[0].styles.bold).toBe(true);
+    });
   });
 
   // ─── Selection Changes ──────────────────────────────────────────────────
@@ -143,6 +165,21 @@ describe('useRichText', () => {
       const segments = result.current.state.segments;
       expect(segments[0].text).toBe('Hello');
       expect(segments[0].styles.bold).toBe(true);
+    });
+
+    it('exposes selection-aware formatting helpers', () => {
+      const { result } = renderHook(() =>
+        useRichText({
+          initialSegments: [createSegment('Bold', { bold: true })],
+        }),
+      );
+
+      act(() => {
+        result.current.actions.handleSelectionChange({ start: 0, end: 4 });
+      });
+
+      expect(result.current.actions.isFormatActive('bold')).toBe(true);
+      expect(result.current.actions.getSelectionStyle().bold).toBe(true);
     });
   });
 

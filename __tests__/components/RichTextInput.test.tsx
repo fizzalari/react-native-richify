@@ -138,6 +138,34 @@ describe('RichTextInput', () => {
     expect(input.props.maxLength).toBe(100);
   });
 
+  it('keeps the editable text hidden while merging caller styles', () => {
+    const { getByPlaceholderText } = render(
+      <RichTextInput
+        placeholder="Type..."
+        textInputProps={{ style: { letterSpacing: 2 } }}
+      />,
+    );
+
+    const input = getByPlaceholderText('Type...');
+    expect(input.props.style).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ letterSpacing: 2 }),
+        expect.objectContaining({ color: 'transparent' }),
+      ]),
+    );
+  });
+
+  it('only enables internal scrolling when maxHeight is set', () => {
+    const { getByPlaceholderText, rerender } = render(
+      <RichTextInput placeholder="Type..." />,
+    );
+
+    expect(getByPlaceholderText('Type...').props.scrollEnabled).toBe(false);
+
+    rerender(<RichTextInput placeholder="Type..." maxHeight={300} />);
+    expect(getByPlaceholderText('Type...').props.scrollEnabled).toBe(true);
+  });
+
   it('renders with minHeight', () => {
     const { toJSON } = render(
       <RichTextInput minHeight={200} />,
