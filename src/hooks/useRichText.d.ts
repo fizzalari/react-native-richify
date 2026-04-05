@@ -1,4 +1,4 @@
-import type { StyledSegment, UseRichTextReturn } from '@/types';
+import type { StyledSegment, UseRichTextReturn } from '../types';
 export interface UseRichTextOptions {
     /** Initial segments to populate the editor with. */
     initialSegments?: StyledSegment[];

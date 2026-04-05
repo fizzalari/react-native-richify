@@ -8,16 +8,16 @@ import type {
   RichTextState,
   RichTextActions,
   UseRichTextReturn,
-} from '@/types';
-import { EMPTY_FORMAT_STYLE } from '@/constants/defaultStyles';
+} from '../types';
+import { EMPTY_FORMAT_STYLE } from '../constants/defaultStyles';
 import {
   createSegment,
   segmentsToPlainText,
   reconcileTextChange,
   findPositionInSegments,
-} from '@/utils/parser';
-import { useSelection } from '@/hooks/useSelection';
-import { useFormatting } from '@/hooks/useFormatting';
+} from '../utils/parser';
+import { useSelection } from '../hooks/useSelection';
+import { useFormatting } from '../hooks/useFormatting';
 
 export interface UseRichTextOptions {
   /** Initial segments to populate the editor with. */

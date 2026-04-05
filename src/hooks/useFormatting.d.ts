@@ -1,4 +1,4 @@
-import type { StyledSegment, FormatType, FormatStyle, HeadingLevel, SelectionRange } from '@/types';
+import type { StyledSegment, FormatType, FormatStyle, HeadingLevel, SelectionRange } from '../types';
 interface UseFormattingOptions {
     segments: StyledSegment[];
     selection: SelectionRange;
@@ -22,4 +22,4 @@ export declare function useFormatting({ segments, selection, activeStyles, onSeg
     isFormatActive: (format: FormatType) => boolean;
     currentSelectionStyle: () => FormatStyle;
 };
-export {};
+export { };

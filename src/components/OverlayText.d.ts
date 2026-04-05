@@ -1,5 +1,5 @@
 import React from 'react';
-import type { OverlayTextProps } from '@/types';
+import type { OverlayTextProps } from '../types';
 /**
  * OverlayText renders the styled text segments as a `<Text>` component tree.
  *

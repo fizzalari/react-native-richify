@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import type { SelectionRange } from '@/types';
+import type { SelectionRange } from '../types';
 
 /**
  * Hook for tracking TextInput selection state.

@@ -1,6 +1,6 @@
 import React from 'react';
-import type { UseRichTextReturn } from '@/types';
-import { type UseRichTextOptions } from '@/hooks/useRichText';
+import type { UseRichTextReturn } from '../types';
+import { type UseRichTextOptions } from '../hooks/useRichText';
 export interface RichTextProviderProps extends UseRichTextOptions {
     children: React.ReactNode;
 }

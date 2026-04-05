@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import type { OverlayTextProps } from '@/types';
-import { segmentToTextStyle } from '@/utils/styleMapper';
-import { DEFAULT_THEME } from '@/constants/defaultStyles';
+import type { OverlayTextProps } from '../types';
+import { segmentToTextStyle } from '../utils/styleMapper';
+import { DEFAULT_THEME } from '../constants/defaultStyles';
 
 /**
  * OverlayText renders the styled text segments as a `<Text>` component tree.

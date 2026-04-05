@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
-import type { ToolbarProps, ToolbarItem } from '@/types';
-import { DEFAULT_THEME, DEFAULT_TOOLBAR_ITEMS } from '@/constants/defaultStyles';
-import { ToolbarButton } from '@/components/ToolbarButton';
+import type { ToolbarProps, ToolbarItem } from '../types';
+import { DEFAULT_THEME, DEFAULT_TOOLBAR_ITEMS } from '../constants/defaultStyles';
+import { ToolbarButton } from './ToolbarButton';
 
 /**
  * Formatting toolbar for the rich text editor.

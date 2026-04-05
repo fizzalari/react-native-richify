@@ -6,12 +6,12 @@ import {
   type NativeSyntheticEvent,
   type TextInputSelectionChangeEventData,
 } from 'react-native';
-import type { RichTextInputProps } from '@/types';
-import { DEFAULT_THEME } from '@/constants/defaultStyles';
-import { segmentsToPlainText } from '@/utils/parser';
-import { useRichText } from '@/hooks/useRichText';
-import { OverlayText } from '@/components/OverlayText';
-import { Toolbar } from '@/components/Toolbar';
+import type { RichTextInputProps } from '../types';
+import { DEFAULT_THEME } from '../constants/defaultStyles';
+import { segmentsToPlainText } from '../utils/parser';
+import { useRichText } from '../hooks/useRichText';
+import { OverlayText } from './OverlayText';
+import { Toolbar } from './Toolbar';
 
 /**
  * RichTextInput — The main rich text editor component.

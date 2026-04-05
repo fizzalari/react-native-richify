@@ -1,5 +1,5 @@
 import React from 'react';
-import type { RichTextInputProps } from '@/types';
+import type { RichTextInputProps } from '../types';
 /**
  * RichTextInput — The main rich text editor component.
  *

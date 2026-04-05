@@ -1,21 +1,21 @@
 // ─── Components ──────────────────────────────────────────────────────────────
-export { RichTextInput } from '@/components/RichTextInput';
-export { OverlayText } from '@/components/OverlayText';
-export { Toolbar } from '@/components/Toolbar';
-export { ToolbarButton } from '@/components/ToolbarButton';
+export { RichTextInput } from './components/RichTextInput';
+export { OverlayText } from './components/OverlayText';
+export { Toolbar } from './components/Toolbar';
+export { ToolbarButton } from './components/ToolbarButton';
 
 // ─── Hooks ───────────────────────────────────────────────────────────────────
-export { useRichText } from '@/hooks/useRichText';
-export type { UseRichTextOptions } from '@/hooks/useRichText';
-export { useSelection } from '@/hooks/useSelection';
-export { useFormatting } from '@/hooks/useFormatting';
+export { useRichText } from './hooks/useRichText';
+export type { UseRichTextOptions } from './hooks/useRichText';
+export { useSelection } from './hooks/useSelection';
+export { useFormatting } from './hooks/useFormatting';
 
 // ─── Context ─────────────────────────────────────────────────────────────────
 export {
   RichTextProvider,
   useRichTextContext,
-} from '@/context/RichTextContext';
-export type { RichTextProviderProps } from '@/context/RichTextContext';
+} from './context/RichTextContext';
+export type { RichTextProviderProps } from './context/RichTextContext';
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
 export {
@@ -24,19 +24,19 @@ export {
   getTotalLength,
   mergeAdjacentSegments,
   reconcileTextChange,
-} from '@/utils/parser';
+} from './utils/parser';
 export {
   toggleFormatOnSelection,
   setStyleOnSelection,
   setHeadingOnLine,
   isFormatActiveInSelection,
   getSelectionStyle,
-} from '@/utils/formatter';
+} from './utils/formatter';
 export {
   formatStyleToTextStyle,
   segmentToTextStyle,
   segmentsToTextStyles,
-} from '@/utils/styleMapper';
+} from './utils/styleMapper';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 export {
@@ -46,7 +46,7 @@ export {
   DEFAULT_BASE_TEXT_STYLE,
   HEADING_FONT_SIZES,
   EMPTY_FORMAT_STYLE,
-} from '@/constants/defaultStyles';
+} from './constants/defaultStyles';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 export type {
@@ -65,4 +65,4 @@ export type {
   ToolbarButtonProps,
   ToolbarProps,
   RichTextInputProps,
-} from '@/types';
+} from './types';

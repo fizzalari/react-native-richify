@@ -1,6 +1,6 @@
 {
   "name": "react-native-richify",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A production-grade, fully customizable React Native Rich Text Input using the Overlay Technique — no WebView required.",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",

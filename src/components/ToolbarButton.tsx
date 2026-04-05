@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import type { ToolbarButtonProps } from '@/types';
-import { DEFAULT_THEME } from '@/constants/defaultStyles';
+import type { ToolbarButtonProps } from '../types';
+import { DEFAULT_THEME } from '../constants/defaultStyles';
 
 /**
  * A single toolbar button that toggles a formatting option.
@@ -19,16 +19,16 @@ export const ToolbarButton: React.FC<ToolbarButtonProps> = React.memo(
     const buttonStyle = [
       resolvedTheme.toolbarButtonStyle ?? DEFAULT_THEME.toolbarButtonStyle,
       active &&
-        (resolvedTheme.toolbarButtonActiveStyle ??
-          DEFAULT_THEME.toolbarButtonActiveStyle),
+      (resolvedTheme.toolbarButtonActiveStyle ??
+        DEFAULT_THEME.toolbarButtonActiveStyle),
     ];
 
     const textStyle = [
       resolvedTheme.toolbarButtonTextStyle ??
-        DEFAULT_THEME.toolbarButtonTextStyle,
+      DEFAULT_THEME.toolbarButtonTextStyle,
       active &&
-        (resolvedTheme.toolbarButtonActiveTextStyle ??
-          DEFAULT_THEME.toolbarButtonActiveTextStyle),
+      (resolvedTheme.toolbarButtonActiveTextStyle ??
+        DEFAULT_THEME.toolbarButtonActiveTextStyle),
       // Make italic button actually italic, bold button actually bold, etc.
       label === 'I' && styles.italicLabel,
       label === 'U' && styles.underlineLabel,

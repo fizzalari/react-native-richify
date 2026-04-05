@@ -5,14 +5,14 @@ import type {
   FormatStyle,
   HeadingLevel,
   SelectionRange,
-} from '@/types';
+} from '../types';
 import {
   toggleFormatOnSelection,
   setStyleOnSelection,
   setHeadingOnLine,
   isFormatActiveInSelection,
   getSelectionStyle,
-} from '@/utils/formatter';
+} from '../utils/formatter';
 
 interface UseFormattingOptions {
   segments: StyledSegment[];

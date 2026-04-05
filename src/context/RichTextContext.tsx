@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from 'react';
-import type { RichTextState, RichTextActions, UseRichTextReturn } from '@/types';
-import { useRichText, type UseRichTextOptions } from '@/hooks/useRichText';
+import type { RichTextState, RichTextActions, UseRichTextReturn } from '../types';
+import { useRichText, type UseRichTextOptions } from '../hooks/useRichText';
 
 // ─── Context ─────────────────────────────────────────────────────────────────
 
@@ -56,7 +56,7 @@ export function useRichTextContext(): UseRichTextReturn {
   if (!context) {
     throw new Error(
       'useRichTextContext must be used within a <RichTextProvider>. ' +
-        'Wrap your component tree with <RichTextProvider> to use this hook.',
+      'Wrap your component tree with <RichTextProvider> to use this hook.',
     );
   }
   return context;
