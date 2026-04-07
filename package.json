@@ -37,14 +37,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/user/react-native-richify.git"
+    "url": "https://github.com/soumya-99/react-native-richify.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/user/react-native-richify/issues"
+    "url": "https://github.com/soumya-99/react-native-richify/issues"
   },
-  "homepage": "https://github.com/user/react-native-richify#readme",
+  "homepage": "https://github.com/soumya-99/react-native-richify#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
